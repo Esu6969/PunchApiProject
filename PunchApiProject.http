@@ -1,0 +1,6 @@
+@PunchApiProject_HostAddress = http://localhost:5031
+
+GET {{PunchApiProject_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

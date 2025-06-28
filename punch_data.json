@@ -1,0 +1,44 @@
+[
+  {
+    "PunchId": 1,
+    "EmployeeName": "Dhruvil",
+    "PunchTime": "2025-06-28T22:59:20.427807+05:30",
+    "PunchType": "In"
+  },
+  {
+    "PunchId": 2,
+    "EmployeeName": "Neel",
+    "PunchTime": "2025-06-28T22:59:39.340596+05:30",
+    "PunchType": "In"
+  },
+  {
+    "PunchId": 3,
+    "EmployeeName": "Deep",
+    "PunchTime": "2025-06-28T23:00:03.908638+05:30",
+    "PunchType": "In"
+  },
+  {
+    "PunchId": 4,
+    "EmployeeName": "Anuj",
+    "PunchTime": "2025-06-28T23:00:20.014131+05:30",
+    "PunchType": "In"
+  },
+  {
+    "PunchId": 5,
+    "EmployeeName": "Anuj",
+    "PunchTime": "2025-06-28T23:23:27.399656+05:30",
+    "PunchType": "In"
+  },
+  {
+    "PunchId": 6,
+    "EmployeeName": "Anuj",
+    "PunchTime": "2025-06-28T23:29:19.773958+05:30",
+    "PunchType": "Out"
+  },
+  {
+    "PunchId": 7,
+    "EmployeeName": "Dhruvil",
+    "PunchTime": "2025-06-28T23:29:30.953353+05:30",
+    "PunchType": "Out"
+  }
+]
