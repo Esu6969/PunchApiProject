@@ -12,7 +12,7 @@ namespace PunchApiProject.Controllers
         private static int punchIdCounter = punchRecords.Count > 0 ? punchRecords.Max(p => p.PunchId) + 1 : 1;
         private static readonly string dataFilePath = "punch_data.json";
 
-        // ✅ POST: Punch In / Out with Validation and File Save
+        // POST: Punch In / Out with Validation and File Save
         [HttpPost]
         public IActionResult Punch([FromBody] PunchRequest request)
         {
@@ -36,14 +36,14 @@ namespace PunchApiProject.Controllers
             return Ok(punchRecord);
         }
 
-        // ✅ GET: All Punches
+        //  GET: All Punches
         [HttpGet]
         public IActionResult GetAllPunches()
         {
             return Ok(punchRecords);
         }
 
-        // ✅ GET: Filter by Employee Name
+        //  GET: Filter by Employee Name
         [HttpGet("byName")]
         public IActionResult GetPunchesByName(string name)
         {
@@ -57,7 +57,7 @@ namespace PunchApiProject.Controllers
             return Ok(filtered);
         }
 
-        // ✅ GET: Filter by Date
+        //  GET: Filter by Date
         [HttpGet("byDate")]
         public IActionResult GetPunchesByDate(DateTime date)
         {
@@ -71,14 +71,14 @@ namespace PunchApiProject.Controllers
             return Ok(filtered);
         }
 
-        // ✅ Helper: Save to JSON File
+        //  Helper: Save to JSON File
         private static void SavePunchDataToFile()
         {
             var json = JsonSerializer.Serialize(punchRecords, new JsonSerializerOptions { WriteIndented = true });
             System.IO.File.WriteAllText(dataFilePath, json);
         }
 
-        // ✅ Helper: Load from JSON File (if exists)
+        //  Helper: Load from JSON File (if exists)
         private static List<PunchRecord> LoadPunchDataFromFile()
         {
             if (System.IO.File.Exists(dataFilePath))
