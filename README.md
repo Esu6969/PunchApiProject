@@ -1,4 +1,4 @@
-# 💊 Punch API Project (Backend using C# .NET Web API)
+# Punch API Project (Backend using C# .NET Web API)
 
 ---
 
@@ -60,30 +60,16 @@ This project is ideal for **beginners** learning:
 
 ---
 
-## ✅ Sample Postman Requests
+## ✅ Sample API Endpoints for Postman Testing
 
-| Request Type | URL Example                           |
-| ------------ | ------------------------------------- |
-| POST         | `http://localhost:5000/api/punch/in`  |
-| POST         | `http://localhost:5000/api/punch/out` |
+| HTTP Method | Endpoint URL                          | Description        |
+| ----------- | ------------------------------------- | ------------------ |
+| POST        | `http://localhost:5000/api/punch/in`  | Punch In an employee |
+| POST        | `http://localhost:5000/api/punch/out` | Punch Out an employee |
+| GET         | `http://localhost:5000/api/punch`     | Retrieve all punch history |
+
 
 > ℹ️ *Make sure the API server is running before testing with Postman.*
-
----
-
-## ✅ Project Folder Structure (Example)
-
-```
-PunchApiProject/
-├── Controllers/
-│   └── PunchController.cs
-├── Models/
-│   └── PunchRecord.cs
-├── punch_data.json
-├── Program.cs
-├── Startup.cs
-└── PunchApiProject.csproj
-```
 
 ---
 
@@ -105,18 +91,6 @@ PunchApiProject/
   }
 ]
 ```
-
----
-
-## ✅ How to Contribute
-
-Contributions are welcome!
-
-| Step | Action                |
-| ---- | --------------------- |
-| 1    | Fork the repository   |
-| 2    | Make your changes     |
-| 3    | Submit a pull request |
 
 ---
 
