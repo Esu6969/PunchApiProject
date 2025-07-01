@@ -47,6 +47,7 @@ This project is ideal for **beginners** learning:
 | ----------- | ---------------- | ------------------ |
 | POST        | `/api/punch/in`  | Employee Punch In  |
 | POST        | `/api/punch/out` | Employee Punch Out |
+| GET         | `http://localhost:5000/api/punch`     | Retrieve all punch history |
 
 ---
 
