@@ -34,14 +34,13 @@ To test this API locally:
 
 Start the API server by running:
 dotnet run
-For Punch In, send a POST request to:
-http://localhost:5031/api/punch/punchin
+For Punch In, send a POST request to: http://localhost:5031/api/punch/punchin
 With the body containing the employee name as plain text.
-For Punch Out, send a POST request to:
-http://localhost:5031/api/punch/punchout/{id}
+
+For Punch Out, send a POST request to: http://localhost:5031/api/punch/punchout/{id}
 Where {id} is the unique ID of the punch record.
-To fetch all records, send a GET request to:
-http://localhost:5031/api/punch
+
+To fetch all records, send a GET request to: http://localhost:5031/api/punch
 Each API response returns JSON with timestamped punch data for easy verification.
 
 Database Management (EF Core Migrations)
