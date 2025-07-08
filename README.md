@@ -39,9 +39,7 @@ GET http://localhost:5031/api/punch/totalhours/{id}
 
 
 
-🧪 API Testing Workflow (Postman)
-
-To test the API locally:
+🧪 API Testing Workflow (Postman) - To test the API locally:
 
 - Start the API server:
 - dotnet run
