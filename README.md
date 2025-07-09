@@ -1,75 +1,87 @@
-📌 Project Description
+# 👨‍💼 Employee Punch In/Out API (ASP.NET Core with SQLite)
 
-This is a production-style REST API designed to manage employee attendance records by tracking punch-in and punch-out times. The backend is developed using ASP.NET Core Web API and leverages Entity Framework Core with SQLite as the local database provider.The project reflects clean code practices and real-world backend workflows suitable for professional environments.
+This is a production-ready REST API developed using ASP.NET Core Web API, designed to track employee attendance through punch-in and punch-out timestamps. The system leverages Entity Framework Core with SQLite for efficient, lightweight, and persistent local data storage — ideal for development and small-scale deployments.
 
-✅ Core Features
+The architecture follows clean code principles, with a clear separation of concerns using:
 
-- Record employee punch-in times with the current server timestamp
-- Record punch-out times using a specific punch record ID
-- Retrieve a complete list of punch-in and punch-out records
-- Persistent data storage using a lightweight SQLite database
-- Fully tested using Postman with real-time CRUD operation handling
-- Clean separation of Controllers, Services, DTOs, and Models
+Models for representing the database structure,
+DTOs for secure and clean data transfer,
+Services for encapsulating business logic, and
+Controllers for handling API routes and responses.
+This API is fully tested using Postman, includes proper error handling, input validation, and is structured to be easily maintainable, extensible, and deployable in real-world scenarios.
 
-🛠 Technologies Used
+---
+
+## 🚀 Core Features
+
+- ✅ Punch In (records employee name and punch-in time)
+- ✅ Punch Out (updates punch-out time based on ID)
+- ✅ Get All Punch Records
+- ✅ Filter Records by Date
+- ✅ Calculate Total Hours Worked
+- ✅ SQLite database for persistent storage
+- ✅ Swagger documentation for easy testing
+
+---
+
+## 🧠 Project Structure Overview
+
+This project follows a clean and modular folder structure inspired by industry best practices in backend development using ASP.NET Core. Here's what each folder and file is responsible for:
+
+✅ Controllers/ :- Contains the API endpoints logic.
+- PunchController.cs: Routes HTTP requests like PunchIn, PunchOut, GetAllPunches to the Service Layer. It’s the only class directly exposed to the outside world (like Postman, Swagger, etc.).
+
+✅ Services/
+Handles the core business logic of the application.
+- IPunchServices.cs: Interface that defines the contract for the service.
+- PunchServices.cs: Implements all methods like PunchIn, PunchOut, filter by date, and calculate total hours. Also handles interaction with the database context.
+
+✅ Models/ :- Defines your application’s data structure.
+- PunchRecord.cs: Entity class representing a punch entry. Used directly by Entity Framework Core to create database tables.
+
+✅ DTOs/ :- Encapsulates data passed in HTTP requests and responses to avoid exposing internal models.
+- PunchRequestDTO.cs: Used to accept only required fields (like EmployeeName) from users, keeping your Models secure and clean.
+
+✅ Data/:- Holds the database context and configurations.
+- AppDbContext.cs: Inherits from DbContext and connects your model (PunchRecord) to a local SQLite database using Entity Framework Core.
+
+✅ Migrations/ :- Contains auto-generated database schema change scripts.
+- Created using dotnet ef migrations add <name> command and used to update the SQLite database structure.
+
+✅ Properties/:- Contains metadata like launch settings for development tools (e.g., IIS settings, Swagger, etc.). Mostly auto-managed.
+
+✅ Project Root Files
+
+| File Name               | Description                                                                 |
+|-------------------------|-----------------------------------------------------------------------------|
+| `Program.cs`            | Entry point of the application. Registers services, DB context, and starts the app. |
+| `appsettings.json`      | Configuration file for environment settings (e.g., DB connection string).  |
+| `PunchApiProject.csproj`| Project definition file with references to packages like EF Core, Swagger. |
+| `PunchApiProject.sln`   | Solution file that binds together all projects (.csproj files).             |
+| `punch_data.db`         | Actual SQLite database file used for storing punch records.                |
+| `PunchApiProject.http`  | Lets you test API endpoints directly in VS Code.                           |
+
+---
+
+## ⚙️ Technology Stack
 
 - ASP.NET Core Web API
-- Entity Framework Core (Code First with Migrations)
-- SQLite (Lightweight local database)
-- Postman for API testing
-- .NET CLI for build, run, and migration commands
-  
-🔗 API Endpoints Overview
+- Entity Framework Core (Code First)
+- SQLite (local database)
+- Postman (API testing)
+- Swagger (API documentation)
+- .NET CLI (`dotnet ef`, `dotnet run`)
 
-1. Punch In - POST http://localhost:5031/api/punch/punchin
-   
-2. Punch Out
-POST http://localhost:5031/api/punch/punchout/{id}
-Updates punch-out time by record ID
+---
 
-3. Get All Records
-GET http://localhost:5031/api/punch
-Returns all stored punch-in/out entries
+## 🔗 API Endpoints
 
-4. Filter by Date
-GET http://localhost:5031/api/punch/filter?date=2025-07-07
+| Method | Endpoint                            | Description                     |
+|--------|-------------------------------------|---------------------------------|
+| POST   | `/api/punch/punchin`                | Punch in employee               |
+| POST   | `/api/punch/punchout/{id}`          | Punch out employee by ID        |
+| GET    | `/api/punch`                        | Get all punch records           |
+| GET    | `/api/punch/filter?date=YYYY-MM-DD` | Filter records by specific date |
+| GET    | `/api/punch/totalhours/{id}`        | Calculate total hours worked    |
 
-5. Get Total Hours Worked
-GET http://localhost:5031/api/punch/totalhours/{id}
-
-
-
-🧪 API Testing Workflow (Postman) - To test the API locally:
-
-- Start the API server:
-- dotnet run
-- For Punch In, Send a POST request to :-  http://localhost:5031/api/punch/punchin
-
-- For Punch Out:
-  Send a POST request to :- http://localhost:5031/api/punch/punchout/{id}
-
-- For All Records:
-  Send a GET request to :- http://localhost:5031/api/punch
-
-All responses are returned in clean JSON format with real-time timestamps.
-
-🗃️ Database Management (EF Core Migrations)
-
-This project uses Entity Framework Core Code First for managing schema changes.
-
-To apply migrations and update the database, use:
-
-dotnet ef migrations add InitialCreate
-dotnet ef database update
-SQLite will automatically create and update the file: punch_data.db in the root directory.
-
-🧠 Notes
-
-This project demonstrates real-world backend development practices, including:
-
-- Proper usage of dependency injection for the database context
-- Error handling for invalid or missing punch records
-- Clean separation of concerns between Models, DTOs, Services, and Controllers
-- Well-organized folder structure and naming conventions
-- Designed to be easily extended with authentication, logging, data export, etc.
-
+---
