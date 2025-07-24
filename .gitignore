@@ -1,0 +1,23 @@
+# Ignore build outputs
+bin/
+obj/
+
+# Ignore user secrets and environment files
+.env
+appsettings.Development.json
+
+# Ignore local database files
+*.db
+*.sqlite
+*.sqlite3
+*.mdf
+
+# Ignore Visual Studio Code settings (optional)
+.vscode/
+
+# Ignore logs
+*.log
+
+# Ignore system files
+.DS_Store
+Thumbs.db
