@@ -1,92 +1,72 @@
 using PunchApiProject.Models;
+using PunchApiProject.Data;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace PunchApiProject.Services
 {
     public class PunchService : IPunchService
     {
-        private static readonly string DataFilePath = "punch_data.json";
-        private static List<PunchRecord> _punchRecords = LoadPunchDataFromFile();
+        private readonly PunchDbContext _context;
 
-        private static List<PunchRecord> LoadPunchDataFromFile()
+        public PunchService(PunchDbContext context)
         {
-            if (!File.Exists(DataFilePath))
-                return new List<PunchRecord>();
-
-            var json = File.ReadAllText(DataFilePath);
-            return JsonSerializer.Deserialize<List<PunchRecord>>(json) ?? new List<PunchRecord>();
-        }
-
-        private static void SavePunchDataToFile()
-        {
-            var json = JsonSerializer.Serialize(_punchRecords, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(DataFilePath, json);
+            _context = context;
         }
 
         public async Task PunchInAsync(int employeeId)
         {
-            var punchInRecord = new PunchRecord
+            var punch = new Punch
             {
-                Id = _punchRecords.Count + 1,
                 EmployeeId = employeeId,
-                PunchInTime = DateTime.Now
+                PunchIn = DateTime.Now
             };
-
-            _punchRecords.Add(punchInRecord);
-            SavePunchDataToFile();
-
-            await Task.CompletedTask;
+            _context.Punches.Add(punch);
+            await _context.SaveChangesAsync();
         }
 
         public async Task PunchOutAsync(int employeeId)
         {
-            var record = _punchRecords
-                .Where(p => p.EmployeeId == employeeId && p.PunchOutTime == null)
-                .OrderByDescending(p => p.PunchInTime)
-                .FirstOrDefault();
+            var record = await _context.Punches
+                .Where(p => p.EmployeeId == employeeId && p.PunchOut == null)
+                .OrderByDescending(p => p.PunchIn)
+                .FirstOrDefaultAsync();
 
             if (record != null)
             {
-                record.PunchOutTime = DateTime.Now;
-                SavePunchDataToFile();
+                record.PunchOut = DateTime.Now;
+                await _context.SaveChangesAsync();
             }
-
-            await Task.CompletedTask;
         }
 
-        public async Task<IEnumerable<PunchRecord>> GetAllPunchRecordsAsync()
+        public async Task<IEnumerable<Punch>> GetAllPunchRecordsAsync()
         {
-            return await Task.FromResult(_punchRecords);
+            return await _context.Punches.ToListAsync();
         }
 
-        public async Task<IEnumerable<PunchRecord>> FilterPunchRecordsByDateAsync(DateTime startDate, DateTime endDate)
+        public async Task<IEnumerable<Punch>> FilterPunchRecordsByDateAsync(DateTime startDate, DateTime endDate)
         {
-            var filtered = _punchRecords
-                .Where(p => p.PunchInTime.Date >= startDate.Date && p.PunchInTime.Date <= endDate.Date)
-                .ToList();
-
-            return await Task.FromResult(filtered);
+            return await _context.Punches
+                .Where(p => p.PunchIn.Date >= startDate.Date && p.PunchIn.Date <= endDate.Date)
+                .ToListAsync();
         }
 
         public async Task<TimeSpan> CalculateTotalHoursAsync(int employeeId)
         {
-            var employeeRecords = _punchRecords
-                .Where(p => p.EmployeeId == employeeId && p.PunchOutTime.HasValue)
-                .ToList();
+            var records = await _context.Punches
+                .Where(p => p.EmployeeId == employeeId && p.PunchOut.HasValue)
+                .ToListAsync();
 
-            TimeSpan totalDuration = TimeSpan.Zero;
-
-            foreach (var record in employeeRecords)
+            TimeSpan total = TimeSpan.Zero;
+            foreach (var record in records)
             {
-                totalDuration += record.PunchOutTime.Value - record.PunchInTime;
+                total += record.PunchOut.Value - record.PunchIn;
             }
-
-            return await Task.FromResult(totalDuration);
+            return total;
         }
     }
 }
+            

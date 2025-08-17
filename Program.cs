@@ -8,8 +8,8 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // DB connection
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+builder.Services.AddDbContext<PunchDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Services
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
