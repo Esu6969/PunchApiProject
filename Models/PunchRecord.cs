@@ -10,6 +10,6 @@ namespace PunchApiProject.Models
         public int EmployeeId { get; set; }
         public DateTime PunchInTime { get; set; }
         public DateTime? PunchOutTime { get; set; }
-        public Employee Employee { get; set; }
+        public Employee? Employee { get; set; }
     }
 }
