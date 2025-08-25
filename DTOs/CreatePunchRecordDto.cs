@@ -1,6 +1,6 @@
 namespace PunchApiProject.DTOs
 {
-    public class CreatePunchRecordDto
+    public class CreatePunchRecordDtos
     {
         public string EmployeeId { get; set; } = string.Empty;
     }

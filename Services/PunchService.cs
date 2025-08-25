@@ -8,11 +8,12 @@ using System.Threading.Tasks;
 
 namespace PunchApiProject.Services
 {
+    /// <summary>Handles punch-in/out logic and queries.</summary>
     public class PunchService : IPunchService
     {
-        private readonly PunchDbContext _context;
+        private readonly AppDbContext _context;
 
-        public PunchService(PunchDbContext context)
+        public PunchService(AppDbContext context)
         {
             _context = context;
         }
@@ -24,7 +25,8 @@ namespace PunchApiProject.Services
                 EmployeeId = employeeId,
                 PunchIn = DateTime.Now
             };
-            _context.Punches.Add(punch);
+
+            await _context.Punches.AddAsync(punch);
             await _context.SaveChangesAsync();
         }
 
@@ -44,13 +46,14 @@ namespace PunchApiProject.Services
 
         public async Task<IEnumerable<Punch>> GetAllPunchRecordsAsync()
         {
-            return await _context.Punches.ToListAsync();
+            return await _context.Punches.AsNoTracking().ToListAsync();
         }
 
         public async Task<IEnumerable<Punch>> FilterPunchRecordsByDateAsync(DateTime startDate, DateTime endDate)
         {
             return await _context.Punches
                 .Where(p => p.PunchIn.Date >= startDate.Date && p.PunchIn.Date <= endDate.Date)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
@@ -58,15 +61,14 @@ namespace PunchApiProject.Services
         {
             var records = await _context.Punches
                 .Where(p => p.EmployeeId == employeeId && p.PunchOut.HasValue)
+                .AsNoTracking()
                 .ToListAsync();
 
             TimeSpan total = TimeSpan.Zero;
-            foreach (var record in records)
-            {
-                total += record.PunchOut.Value - record.PunchIn;
-            }
+            foreach (var r in records)
+                total += r.PunchOut!.Value - r.PunchIn;
+
             return total;
         }
     }
 }
-            

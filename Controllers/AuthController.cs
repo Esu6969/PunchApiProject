@@ -7,6 +7,7 @@ using PunchApiProject.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using PunchApiProject.DTOs;
 
 namespace PunchApiProject.Controllers
 {
@@ -45,7 +46,7 @@ namespace PunchApiProject.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginDto dto)
+        public async Task<IActionResult> Login(LoginDtos dto)
         {
             var user = await _context.Employees.SingleOrDefaultAsync(u => u.Username == dto.Username);
             if (user == null || !VerifyPasswordHash(dto.Password, user.PasswordHash, user.PasswordSalt))

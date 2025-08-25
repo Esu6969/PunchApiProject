@@ -1,6 +1,16 @@
+using PunchApiProject.Models;
 using PunchApiProject.DTOs;
 
-public interface IEmployeeService
+namespace PunchApiProject.Services
 {
-    Task<List<EmployeeFullRecordDto>> GetAllEmployeeActivityAsync();
+    public interface IEmployeeService
+    {
+        Task<IEnumerable<Employee>> GetAllEmployeesAsync();
+        Task<Employee?> GetEmployeeByIdAsync(int id);
+        Task<Employee> AddEmployeeAsync(Employee employee);
+        Task<Employee?> UpdateEmployeeAsync(Employee employee);
+        Task<bool> DeleteEmployeeAsync(int id);
+        Task<ServiceResponse<string>> RegisterAsync(RegisterDto request);
+        Task<IEnumerable<EmployeeActivity>> GetAllEmployeeActivityAsync();
+    }
 }
