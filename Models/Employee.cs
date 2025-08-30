@@ -6,6 +6,7 @@ namespace PunchApiProject.Models
         public string Username { get; set; } = string.Empty;
         public byte[] PasswordHash { get; set; }
         public byte[] PasswordSalt { get; set; }
+        public string? Token { get; set; }
 
         public ICollection<PunchRecord> PunchRecords { get; set; } = new List<PunchRecord>();
         public ICollection<LoginRecord> Logins { get; set; } = new List<LoginRecord>();

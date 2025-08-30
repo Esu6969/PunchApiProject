@@ -11,36 +11,24 @@ namespace PunchApiProject.Services
     /// <summary>Handles punch-in/out logic and queries.</summary>
     public class PunchService : IPunchService
     {
-        private readonly AppDbContext _context;
+        private readonly PunchDbContext _context;
 
-        public PunchService(AppDbContext context)
+        public PunchService(PunchDbContext context)
         {
             _context = context;
         }
 
-        public async Task PunchInAsync(int employeeId)
+        public async Task AddPunchRecordAsync(Punch punch)
         {
-            var punch = new Punch
+            try
             {
-                EmployeeId = employeeId,
-                PunchIn = DateTime.Now
-            };
-
-            await _context.Punches.AddAsync(punch);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task PunchOutAsync(int employeeId)
-        {
-            var record = await _context.Punches
-                .Where(p => p.EmployeeId == employeeId && p.PunchOut == null)
-                .OrderByDescending(p => p.PunchIn)
-                .FirstOrDefaultAsync();
-
-            if (record != null)
-            {
-                record.PunchOut = DateTime.Now;
+                _context.Punches.Add(punch);
                 await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Log or rethrow with more details
+                throw new Exception("Error saving Punch record: " + ex.Message, ex);
             }
         }
 
@@ -52,7 +40,7 @@ namespace PunchApiProject.Services
         public async Task<IEnumerable<Punch>> FilterPunchRecordsByDateAsync(DateTime startDate, DateTime endDate)
         {
             return await _context.Punches
-                .Where(p => p.PunchIn.Date >= startDate.Date && p.PunchIn.Date <= endDate.Date)
+                .Where(p => p.ActionDateTime.Date >= startDate.Date && p.ActionDateTime.Date <= endDate.Date)
                 .AsNoTracking()
                 .ToListAsync();
         }
@@ -60,13 +48,25 @@ namespace PunchApiProject.Services
         public async Task<TimeSpan> CalculateTotalHoursAsync(int employeeId)
         {
             var records = await _context.Punches
-                .Where(p => p.EmployeeId == employeeId && p.PunchOut.HasValue)
+                .Where(p => p.EmployeeId == employeeId && (p.ActionType == "PunchIn" || p.ActionType == "PunchOut"))
+                .OrderBy(p => p.ActionDateTime)
                 .AsNoTracking()
                 .ToListAsync();
 
             TimeSpan total = TimeSpan.Zero;
+            DateTime? lastIn = null;
             foreach (var r in records)
-                total += r.PunchOut!.Value - r.PunchIn;
+            {
+                if (r.ActionType == "PunchIn")
+                {
+                    lastIn = r.ActionDateTime;
+                }
+                else if (r.ActionType == "PunchOut" && lastIn.HasValue)
+                {
+                    total += r.ActionDateTime - lastIn.Value;
+                    lastIn = null;
+                }
+            }
 
             return total;
         }

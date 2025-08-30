@@ -8,10 +8,10 @@ using PunchApiProject.Data;
 
 #nullable disable
 
-namespace PunchApiProject.Migrations
+namespace PunchApiProject.Migrations.PunchDb
 {
-    [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(PunchDbContext))]
+    partial class PunchDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -38,35 +38,19 @@ namespace PunchApiProject.Migrations
                         .IsRequired()
                         .HasColumnType("bytea");
 
+                    b.Property<string>("Token")
+                        .HasColumnType("text");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Username")
+                        .IsUnique();
+
                     b.ToTable("Employees");
-                });
-
-            modelBuilder.Entity("PunchApiProject.Models.EmployeeActivity", b =>
-                {
-                    b.Property<int>("ActivityId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ActivityId"));
-
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("PunchInTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("PunchOutTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("ActivityId");
-
-                    b.ToTable("EmployeeActivities");
                 });
 
             modelBuilder.Entity("PunchApiProject.Models.LoginRecord", b =>
@@ -98,14 +82,23 @@ namespace PunchApiProject.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("ActionDateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ActionType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("EmployeeId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("PunchIn")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("PunchOut")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<string>("EmployeeName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

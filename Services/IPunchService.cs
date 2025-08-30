@@ -7,8 +7,7 @@ namespace PunchApiProject.Services
 {
     public interface IPunchService
     {
-        Task PunchInAsync(int employeeId);
-        Task PunchOutAsync(int employeeId);
+        Task AddPunchRecordAsync(Punch punch); // New method
         Task<IEnumerable<Punch>> GetAllPunchRecordsAsync();
         Task<IEnumerable<Punch>> FilterPunchRecordsByDateAsync(DateTime startDate, DateTime endDate);
         Task<TimeSpan> CalculateTotalHoursAsync(int employeeId);
