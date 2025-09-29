@@ -22,14 +22,23 @@ namespace PunchApiProject.Controllers
         public async Task<IActionResult> Register([FromBody] EmployeeRegisterDto dto)
         {
             var employee = await _punchService.RegisterEmployeeAsync(dto.Name, dto.Email);
-            return Ok(employee);
+            return Ok(new {
+                message = "You have registered successfully!",
+                employee
+            });
         }
 
         [HttpPost("punch")]
         public async Task<IActionResult> Punch([FromBody] CreatePunchRecordDto dto)
         {
             var punch = await _punchService.AddPunchRecordAsync(dto.EmployeeId, dto.ActionType);
-            return Ok(punch);
+            string greeting = dto.ActionType == "PunchIn"
+                ? "You have successfully logged in at time of punch in!"
+                : "You have successfully logged out at time of punch out!";
+            return Ok(new {
+                message = greeting,
+                punch
+            });
         }
 
         [HttpGet("records")]
