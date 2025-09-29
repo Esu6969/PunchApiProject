@@ -8,8 +8,8 @@ namespace PunchApiProject.Models
     {
         public int Id { get; set; }
         public int EmployeeId { get; set; }
-        public DateTime PunchInTime { get; set; }
-        public DateTime? PunchOutTime { get; set; }
-        public Employee? Employee { get; set; }
+        public Employee Employee { get; set; } = null!;
+        public DateTime ActionDateTime { get; set; }
+        public string ActionType { get; set; } = string.Empty; // "PunchIn" or "PunchOut"
     }
 }
