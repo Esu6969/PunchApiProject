@@ -1,0 +1,178 @@
+/* Full-screen animated gradient background */
+.animated-bg {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(-45deg, #1a73e8, #673ab7, #03a9f4, #00bcd4);
+  background-size: 400% 400%;
+  animation: gradientMove 10s ease infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Login card styling */
+.login-container {
+  position: relative;
+  z-index: 5;
+}
+
+.login-box {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 40px 50px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  color: white;
+  backdrop-filter: blur(10px);
+  width: 350px;
+}
+
+.login-box h2 {
+  margin-bottom: 10px;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.subtitle {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-bottom: 30px;
+}
+
+/* Input field */
+.input-group input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  margin-bottom: 25px;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  transition: 0.3s;
+}
+
+.input-group input:focus {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Punch In button */
+.login-btn {
+  background: linear-gradient(90deg, #673ab7, #2196f3);
+  border: none;
+  padding: 12px 40px;
+  color: white;
+  border-radius: 12px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+  background: linear-gradient(90deg, #2196f3, #673ab7);
+  transform: scale(1.05);
+}
+
+/* Floating shapes animation */
+.shape {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  animation: float 10s infinite ease-in-out;
+}
+
+.shape1 {
+  width: 80px;
+  height: 80px;
+  top: 15%;
+  left: 10%;
+  animation-delay: 0s;
+}
+.shape2 {
+  width: 60px;
+  height: 60px;
+  bottom: 10%;
+  right: 15%;
+  animation-delay: 2s;
+}
+.shape3 {
+  width: 100px;
+  height: 100px;
+  top: 50%;
+  right: 25%;
+  animation-delay: 4s;
+}
+.shape4 {
+  width: 120px;
+  height: 120px;
+  bottom: 20%;
+  left: 25%;
+  animation-delay: 6s;
+}
+.shape5 {
+  width: 50px;
+  height: 50px;
+  top: 30%;
+  right: 10%;
+  animation-delay: 8s;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-30px);
+  }
+}
+/* Success / Error messages */
+.message {
+  margin-top: 20px;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.success {
+  color: #00ff9d;
+}
+
+.error {
+  color: #ff6b6b;
+}
+
+/* Register link text */
+.register-text {
+  margin-top: 25px;
+  font-size: 14px;
+  color: #fff;
+  opacity: 0.8;
+}
+
+.register-text span {
+  color: #00e5ff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.register-text span:hover {
+  color: #76ff03;
+  text-decoration: underline;
+}
