@@ -1,127 +1,68 @@
-# 👨‍💼 Employee Punch In/Out API (ASP.NET Core with PostgreSQL)
+# Employee Punch API Project
 
-This is a production-ready REST API built with ASP.NET Core Web API that allows employees to punch in and punch out, while tracking their working hours with accurate timestamps. The backend uses Entity Framework Core with a PostgreSQL database, designed for scalable, secure, and maintainable deployments.
+A full-stack employee punch-in/punch-out and registration system built with React (frontend), ASP.NET Core (backend), and PostgreSQL (database).
 
-The architecture follows clean code principles, with a clear separation of concerns using:
+## Features
 
-- ✅ Models for representing the database structure
-- ✅ DTOs for secure and clean data transfer
-- ✅ Services for encapsulating business logic
-- ✅ Controllers for handling API routes and responses
-  
-This API is fully tested using Postman, includes proper error handling, input validation, Swagger UI, and is structured to be maintainable, extensible, and deployable.
+- Employee registration with name and email
+- Secure punch-in and punch-out functionality
+- Real-time feedback and greeting messages after registration and punch actions
+- Dashboard for employees to view their profile, company details, and work status
+- Timer on the dashboard to track work duration, with punch-out summary
+- Responsive, modern UI with professional design and color scheme
+- RESTful API endpoints for registration, punch actions, and record retrieval
+- CORS enabled for seamless frontend-backend communication
+- Error handling and validation for all user actions
+- JWT authentication setup for secure login and protected routes (extensible)
+- Swagger UI for API documentation (`/swagger`)
+- Health check endpoint (`/health`)
+- Automatic database migrations on startup
 
----
+## Tech Stack
 
-🚀 Core Features
+- **Frontend:** React, JavaScript, CSS
+- **Backend:** ASP.NET Core (C#)
+- **Database:** PostgreSQL
 
-- ✅ Register/Login (JWT)
-- ✅ Punch In / Punch Out
-- ✅ View All Punch Records
-- ✅ Filter Records by Date
-- ✅ Calculate Total Hours Worked
-- ✅ Get Full Activity (Authenticated)
-- ✅ Secure JWT-based Authorization
-- ✅ Swagger UI for documentation
-- ✅ PostgreSQL for persistent storage
-  
----
-**UPDATES**
-## ✅ Project Features & Fixes
+## Getting Started
 
-| Feature / Fix                                  | Description                                                                 |
-|------------------------------------------------|-----------------------------------------------------------------------------|
-| 🔄 Switched from SQLite to PostgreSQL          | Fully migrated using EF Core                                                |
-| 🔐 PostgreSQL Permission Fixes                 | Created custom user `Dhruvil` and granted full privileges to run EF migrations |
-| 🛠️ EF Core Migration Working with PostgreSQL  | Enabled `dotnet ef database update` using correct ownership and sequence grants |
-| 🔑 JWT Authentication Added                    | Secured routes using `[Authorize]` attribute and token-based login         |
-| 🔐 Secure Endpoints                            | Punching and employee activity endpoints now require Bearer token          |
-| 🧪 Postman Testing Verified                    | All endpoints tested using Postman with appropriate headers and tokens     |
-| 📤 Added Endpoint for `GET /api/employee/all-activity` | Returns full employee punch-in/out activity                          |
-| 🗂️ Refactored Controllers                      | Punch logic is separated from authentication logic                         |
+1. Clone the repository:
+   ```
+   git clone https://github.com/yourusername/punch-api-project.git
+   cd punch-api-project
+   ```
 
+2. Update your database connection strings in `appsettings.json`.
 
----
-**🔐 Authentication Flow (JWT)**
+3. Run the backend:
+   ```
+   dotnet run
+   ```
 
-	1.	Register via POST /api/employee/register
-	2.	Login via POST /api/employee/login
-	3.	Receive JWT Token
-	4.	Use the token in Authorization header: Authorization: Bearer <your_token_here>
+4. Run the frontend:
+   ```
+   cd frontend
+   npm install
+   npm start
+   ```
 
- ---
- 
-**🧠 Project Structure Overview**
+5. Access the app:
+   - API Swagger: [http://localhost:5031/swagger](http://localhost:5031/swagger)
+   - Frontend: [http://localhost:3000](http://localhost:3000)
 
-This project follows a clean and modular folder structure inspired by industry best practices in backend development using ASP.NET Core. Here's what each folder and file is responsible for:
+## API Endpoints
 
-- ✅ **Controllers/**
-     PunchController.cs: Routes HTTP requests like PunchIn, PunchOut, GetAllPunches to the Service Layer.
-  
-- ✅ **Services/**
-     IPunchServices.cs: Interface defining service contracts.
-     PunchServices.cs: Implements methods like PunchIn, PunchOut, filtering, and total hours logic.
-  
-- ✅ **Models/**
-     PunchRecord.cs: Entity class representing a punch record used by EF Core to generate tables.
-  
-- ✅ **DTOs/**
-     PunchRequestDTO.cs: Accepts clean input from users to ensure secure and clean operations.
-  
-- ✅ **Data/**
-     AppDbContext.cs: Connects the PunchRecord model to a PostgreSQL database using EF Core.
-  
-- ✅ **Migrations/**
-     Contains schema change history using EF Core dotnet ef tools.
-  
-- ✅ **Properties/**
-     Contains metadata like Swagger and launch settings for development tools.
-  
-- ✅ **Project Root Files**
-  
+- `POST /api/punch/register` — Register a new employee
+- `POST /api/punch/in` — Punch in
+- `POST /api/punch/out` — Punch out
+- `GET /api/punch/records` — Get punch records
+- `GET /health` — Health check
 
-**File Name	Description**
+## Development Notes
 
-| File Name                | Description                                                  |
-|--------------------------|--------------------------------------------------------------|
-| `Program.cs`             | Registers services, DB context, and launches the app.        |
-| `appsettings.json`       | Contains PostgreSQL connection string and config settings.   |
-| `PunchApiProject.csproj` | Lists all dependencies and project settings.                 |
-| `PunchApiProject.sln`    | Solution file for organizing the project.                    |
-| `PunchApiProject.http`   | Enables direct API testing inside Visual Studio Code.        |
+- CORS is enabled for local frontend development.
+- Automatic database migrations are applied on backend startup.
+- Session and static file support are enabled.
+- Fallback route serves `login.html` for SPA support.
 
-**⚙️ Technology Stack**
-
-- ASP.NET Core Web API
-- Entity Framework Core (Code First)
-- PostgreSQL (replaces SQLite)
-- Postman (API testing)
-- Swagger (API documentation)
-- .NET CLI (dotnet ef, dotnet run, dotnet build)
-  
-**## 📌 API Endpoints**
-
-| Method | Endpoint                                | Description                          | Auth Required |
-|--------|-----------------------------------------|--------------------------------------|---------------|
-| POST   | `/api/employee/register`                | Register a new user                  | ❌            |
-| POST   | `/api/employee/login`                   | Login and receive JWT token          | ❌            |
-| POST   | `/api/punch/punchin`                    | Punch in                             | ✅            |
-| POST   | `/api/punch/punchout/{id}`              | Punch out using punch record ID      | ✅            |
-| GET    | `/api/punch`                            | Get all punch records                | ✅            |
-| GET    | `/api/punch/filter?date=YYYY-MM-DD`     | Filter records by date               | ✅            |
-| GET    | `/api/punch/totalhours/{id}`            | Calculate total hours worked         | ✅            |
-| GET    | `/api/employee/all-activity`            | View all activity by all employees   | ✅            |
-
----
-
-**🛠️ Tools & Technologies**
-
--	ASP.NET Core Web API (.NET 7+)
--	Entity Framework Core (Code-First)
--	PostgreSQL
--	Postman (Testing)
--	Swagger (Auto-generated Docs)
--	JWT Authentication
--	.NET CLI (dotnet ef, dotnet run, dotnet build)
-
----
+##
