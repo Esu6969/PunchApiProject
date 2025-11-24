@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Punch In - Login</title>
+    <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Animated background circles -->
+        <div class="circle circle1"></div>
+        <div class="circle circle2"></div>
+        <div class="circle circle3"></div>
+
+        <!-- Login Card -->
+        <div class="login-card">
+            <div class="login-header">
+                <div class="icon-badge">🔐</div>
+                <h1>Employee Punch In</h1>
+                <p class="subtitle">Enter your Employee ID to Punch In</p>
+            </div>
+
+            <div class="error-message" id="errorMessage">
+                ⚠️ Invalid credentials. Please try again.
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="employeeId">Employee ID</label>
+                    <input 
+                        type="text" 
+                        id="employeeId" 
+                        name="employeeId" 
+                        placeholder="Enter your employee ID"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn-primary" id="submitBtn">
+                    <span id="btnText">Punch In</span>
+                    <span class="arrow" id="btnArrow">🔓</span>
+                </button>
+            </form>
+
+            <div class="footer-text">
+                New Employee? <a href="register.html">Create account here</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/login.js"></script>
+</body>
+</html>

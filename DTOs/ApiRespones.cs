@@ -1,10 +1,9 @@
-using System;
-
 namespace PunchApiProject.DTOs
 {
     public class ApiResponse
     {
+        public bool Success { get; set; } = true;
         public string Message { get; set; } = string.Empty;
-        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        public object? Data { get; set; }
     }
 }

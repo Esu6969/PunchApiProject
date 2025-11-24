@@ -1,13 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using PunchApiProject.Data;
-using PunchApiProject.DTOs;
 using PunchApiProject.Models;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using PunchApiProject.DTOs;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace PunchApiProject.Controllers
 {
@@ -15,84 +12,165 @@ namespace PunchApiProject.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly AppDbContext _context;
-        private readonly IConfiguration _config;
+        private readonly PunchDbContext _context;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(AppDbContext context, IConfiguration config)
+        public AuthController(PunchDbContext context, ILogger<AuthController> logger)
         {
             _context = context;
-            _config = config;
+            _logger = logger;
         }
 
+        // POST: api/auth/register
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterDto dto)
+        public async Task<IActionResult> Register([FromBody] EmployeeRegistrationDto dto)
         {
-            if (await _context.Employees.AnyAsync(u => u.Username == dto.Username))
-                return BadRequest("Username already exists");
-
-            CreatePasswordHash(dto.Password, out byte[] hash, out byte[] salt);
-
-            var employee = new Employee
+            try
             {
-                Username = dto.Username,
-                PasswordHash = hash,
-                PasswordSalt = salt
-            };
+                _logger.LogInformation("Registration attempt for Employee ID: {EmployeeId}", dto.EmployeeId);
 
-            _context.Employees.Add(employee);
-            await _context.SaveChangesAsync();
+                // Validate input
+                if (string.IsNullOrEmpty(dto.EmployeeId) || string.IsNullOrEmpty(dto.Email))
+                {
+                    return BadRequest(new { success = false, message = "Employee ID and Email are required" });
+                }
 
-            return Ok("Registration successful");
+                // Check if employee ID already exists
+                var existingEmployee = await _context.Employees
+                    .FirstOrDefaultAsync(e => e.EmployeeId == dto.EmployeeId);
+
+                if (existingEmployee != null)
+                {
+                    return BadRequest(new { success = false, message = "Employee ID already exists" });
+                }
+
+                // Check if email already exists
+                var existingEmail = await _context.Employees
+                    .FirstOrDefaultAsync(e => e.Email == dto.Email);
+
+                if (existingEmail != null)
+                {
+                    return BadRequest(new { success = false, message = "Email already registered" });
+                }
+
+                // Create new employee
+                var employee = new Employee
+                {
+                    EmployeeId = dto.EmployeeId,
+                    FirstName = dto.FirstName,
+                    LastName = dto.LastName,
+                    Email = dto.Email,
+                    Phone = dto.Phone ?? "",
+                    Department = dto.Department,
+                    Position = dto.Position,
+                    PasswordHash = HashPassword(dto.Password),
+                    JoinDate = string.IsNullOrEmpty(dto.JoinDate) 
+                        ? DateTime.UtcNow 
+                        : DateTime.Parse(dto.JoinDate),
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                _context.Employees.Add(employee);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Employee registered successfully: {EmployeeId}", employee.EmployeeId);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Employee registered successfully",
+                    employeeId = employee.EmployeeId,
+                    name = $"{employee.FirstName} {employee.LastName}"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Registration failed for Employee ID: {EmployeeId}", dto?.EmployeeId);
+                return StatusCode(500, new 
+                { 
+                    success = false,
+                    message = "Registration failed. Please try again.",
+                    error = ex.Message 
+                });
+            }
         }
 
+        // POST: api/auth/login
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginDtos dto)
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            var user = await _context.Employees.SingleOrDefaultAsync(u => u.Username == dto.Username);
-            if (user == null || !VerifyPasswordHash(dto.Password, user.PasswordHash, user.PasswordSalt))
-                return Unauthorized("Invalid credentials");
-
-            string token = CreateToken(user);
-            return Ok(new { token });
-        }
-
-        // 🔐 Token creation
-        private string CreateToken(Employee user)
-        {
-            var claims = new[]
+            try
             {
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
-            };
+                _logger.LogInformation("Login attempt for Employee ID: {EmployeeId}", dto.EmployeeId);
 
-            var jwtKey = _config["Jwt:Key"];
-            if (string.IsNullOrEmpty(jwtKey))
-                throw new InvalidOperationException("JWT key is not configured.");
+                if (string.IsNullOrEmpty(dto.EmployeeId))
+                {
+                    return BadRequest(new { success = false, message = "Employee ID is required" });
+                }
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                // Find employee by EmployeeId STRING field (not the Id INT field)
+                var employee = await _context.Employees
+                    .FirstOrDefaultAsync(e => e.EmployeeId == dto.EmployeeId && e.IsActive);
 
-            var token = new JwtSecurityToken(
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(3),
-                signingCredentials: creds
-            );
+                if (employee == null)
+                {
+                    return Unauthorized(new { success = false, message = "Invalid Employee ID or account is inactive" });
+                }
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+                _logger.LogInformation("Employee found: {EmployeeId} - {Name}", employee.EmployeeId, $"{employee.FirstName} {employee.LastName}");
+
+                // TODO: Add password verification here
+                // For now, just return employee data
+                return Ok(new
+                {
+                    success = true,
+                    employeeId = employee.EmployeeId,
+                    id = employee.Id, // Include integer ID for punch operations
+                    name = $"{employee.FirstName} {employee.LastName}",
+                    email = employee.Email,
+                    department = employee.Department,
+                    position = employee.Position
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Login failed for Employee ID: {EmployeeId}", dto?.EmployeeId);
+                return StatusCode(500, new 
+                { 
+                    success = false,
+                    message = "Login failed. Please try again.",
+                    error = ex.Message 
+                });
+            }
         }
 
-        private void CreatePasswordHash(string password, out byte[] hash, out byte[] salt)
+        // Simple password hashing method
+        private string HashPassword(string password)
         {
-            using var hmac = new System.Security.Cryptography.HMACSHA512();
-            salt = hmac.Key;
-            hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+            using var sha256 = System.Security.Cryptography.SHA256.Create();
+            var hashedBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            return Convert.ToBase64String(hashedBytes);
         }
+    }
 
-        private bool VerifyPasswordHash(string password, byte[] hash, byte[] salt)
-        {
-            using var hmac = new System.Security.Cryptography.HMACSHA512(salt);
-            var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-            return hash.SequenceEqual(computedHash);
-        }
+    // DTOs (Data Transfer Objects)
+    public class EmployeeRegistrationDto
+    {
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string? Phone { get; set; }
+        public string Department { get; set; } = string.Empty;
+        public string Position { get; set; } = string.Empty;
+        public string EmployeeId { get; set; } = string.Empty;
+        public string? JoinDate { get; set; }
+        public string Password { get; set; } = string.Empty;
+    }
+
+    public class LoginDto
+    {
+        public string EmployeeId { get; set; } = string.Empty;
     }
 }

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Registration</title>
+    <link rel="stylesheet" href="css/register.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Animated background circles -->
+        <div class="circle circle1"></div>
+        <div class="circle circle2"></div>
+        <div class="circle circle3"></div>
+
+        <!-- Registration Card -->
+        <div class="register-card">
+            <div class="register-header">
+                <div class="icon-badge">📝</div>
+                <h1>Employee Registration</h1>
+                <p class="subtitle">Create your account to start tracking time</p>
+            </div>
+
+            <div class="success-message" id="successMessage">
+                ✅ Registration successful! Redirecting to login...
+            </div>
+
+            <div class="error-message" id="errorMessage">
+                ⚠️ Registration failed. Please try again.
+            </div>
+
+            <form id="registerForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name *</label>
+                        <input 
+                            type="text" 
+                            id="firstName" 
+                            name="firstName" 
+                            placeholder="John"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lastName">Last Name *</label>
+                        <input 
+                            type="text" 
+                            id="lastName" 
+                            name="lastName" 
+                            placeholder="Doe"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        placeholder="john.doe@company.com"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input 
+                        type="tel" 
+                        id="phone" 
+                        name="phone" 
+                        placeholder="+1 (555) 123-4567"
+                    >
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="department">Department *</label>
+                        <select id="department" name="department" required>
+                            <option value="">Select Department</option>
+                            <option value="Engineering">Engineering</option>
+                            <option value="Sales">Sales</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="HR">Human Resources</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Operations">Operations</option>
+                            <option value="IT">IT Support</option>
+                            <option value="Customer Service">Customer Service</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="position">Position *</label>
+                        <input 
+                            type="text" 
+                            id="position" 
+                            name="position" 
+                            placeholder="Software Developer"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="employeeId">Employee ID *</label>
+                        <input 
+                            type="text" 
+                            id="employeeId" 
+                            name="employeeId" 
+                            placeholder="EMP001"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="joinDate">Join Date *</label>
+                        <input 
+                            type="date" 
+                            id="joinDate" 
+                            name="joinDate" 
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Enter password"
+                        required
+                        minlength="6"
+                    >
+                    <small class="helper-text">Minimum 6 characters</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password *</label>
+                    <input 
+                        type="password" 
+                        id="confirmPassword" 
+                        name="confirmPassword" 
+                        placeholder="Confirm password"
+                        required
+                        minlength="6"
+                    >
+                </div>
+
+                <div class="form-group checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="terms" required>
+                        <span>I agree to the <a href="#terms">Terms and Conditions</a></span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-primary" id="submitBtn">
+                    <span id="btnText">Create Account</span>
+                    <span class="arrow" id="btnArrow">→</span>
+                </button>
+            </form>
+
+            <div class="footer-text">
+                Already have an account? <a href="login.html">Sign in here</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/register.js"></script>
+</body>
+</html>

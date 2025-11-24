@@ -1,5 +1,7 @@
 using PunchApiProject.Models;
 using PunchApiProject.DTOs;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace PunchApiProject.Services
 {
@@ -10,7 +12,7 @@ namespace PunchApiProject.Services
         Task<Employee> AddEmployeeAsync(Employee employee);
         Task<Employee?> UpdateEmployeeAsync(Employee employee);
         Task<bool> DeleteEmployeeAsync(int id);
-        Task<ServiceResponse<string>> RegisterAsync(RegisterDto request);
         Task<IEnumerable<EmployeeActivity>> GetAllEmployeeActivityAsync();
+        Task<ApiResponse> RegisterAsync(EmployeeRegisterDto request);
     }
 }
