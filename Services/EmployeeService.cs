@@ -11,9 +11,9 @@ namespace PunchApiProject.Services
 {
     public class EmployeeService : IEmployeeService
     {
-        private readonly AppDbContext _context;
+        private readonly PunchDbContext _context;
 
-        public EmployeeService(AppDbContext context)
+        public EmployeeService(PunchDbContext context)
         {
             _context = context;
         }

@@ -175,5 +175,6 @@ namespace PunchApiProject.Controllers
                 return StatusCode(500, new { message = "Failed to retrieve activities", error = ex.Message });
             }
         }
+        
     }
 }

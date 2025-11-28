@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using PunchApiProject.Data;
-using PunchApiProject.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,12 +25,14 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Configure Database
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Configure PostgreSQL Database - Direct connection string
+var connectionString = "Host=localhost;Port=6432;Username=Dhruvil;Password=Dhruvil2512;Database=punchdb";
+
+// Configure Npgsql to handle DateTime properly
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 builder.Services.AddDbContext<PunchDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("PunchConnection")));
+    options.UseNpgsql(connectionString));
 
 // Add Swagger/OpenAPI for API documentation
 builder.Services.AddEndpointsApiExplorer();
@@ -45,7 +46,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Add Session support (optional)
+// Add Session support
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -73,22 +74,16 @@ else
     app.UseHsts();
 }
 
-// HTTPS Redirection (optional - uncomment if you have HTTPS configured)
-// app.UseHttpsRedirection();
-
-// Enable static files (for serving frontend from wwwroot)
+// Enable static files
 app.UseStaticFiles();
 
-// Enable default files (index.html, default.html, etc.)
+// Enable default files
 app.UseDefaultFiles(new DefaultFilesOptions
 {
     DefaultFileNames = new List<string> { "login.html", "index.html" }
 });
 
-// Use custom request logging middleware
-app.UseMiddleware<RequestLoggingMiddleware>();
-
-// Use CORS (MUST be before UseAuthorization)
+// Use CORS
 app.UseCors("AllowFrontend");
 
 // Enable Session
@@ -111,7 +106,7 @@ app.MapGet("/health", () => Results.Ok(new
     environment = app.Environment.EnvironmentName
 }));
 
-// Fallback route for SPA (if needed)
+// Fallback route for SPA
 app.MapFallbackToFile("login.html");
 
 // Log startup information
@@ -121,22 +116,22 @@ logger.LogInformation("📍 Environment: {Environment}", app.Environment.Environ
 logger.LogInformation("🌐 Swagger UI: http://localhost:5031/swagger");
 logger.LogInformation("🔐 Login Page: http://localhost:5031/login.html");
 
-// Run migrations automatically (optional - for development)
+// Create database and tables if they don't exist
 using (var scope = app.Services.CreateScope())
 {
     try
     {
-        var appDb = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var punchDb = scope.ServiceProvider.GetRequiredService<PunchDbContext>();
         
-        appDb.Database.Migrate();
-        punchDb.Database.Migrate();
+        // This will create the database and tables if they don't exist
+        punchDb.Database.EnsureCreated();
         
-        logger.LogInformation("✅ Database migrations applied successfully");
+        logger.LogInformation("✅ Database and tables created successfully");
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "❌ Error applying database migrations");
+        logger.LogError(ex, "❌ Error creating database tables: {Message}", ex.Message);
+        logger.LogWarning("⚠️  Application will continue without database. Fix connection and restart.");
     }
 }
 

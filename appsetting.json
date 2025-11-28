@@ -1,0 +1,12 @@
+{
+  "ConnectionStrings": {
+    "PunchConnection": "postgresql://Dhruvil:Dhruvil2512@localhost:6432/punchdb"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+}
