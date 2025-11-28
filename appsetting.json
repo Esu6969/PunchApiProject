@@ -1,12 +1,11 @@
 {
   "ConnectionStrings": {
-    "PunchConnection": "postgresql://Dhruvil:Dhruvil2512@localhost:6432/punchdb"
+    "DefaultConnection": "Host=${DB_HOST};Port=${DB_PORT};Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASS}"
   },
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
-    }
-  },
-  "AllowedHosts": "*"
+  "JwtSettings": {
+    "SecretKey": "${JWT_SECRET_KEY}",
+    "Issuer": "PunchApi",
+    "Audience": "PunchApiUsers",
+    "ExpiryMinutes": 60
+  }
 }

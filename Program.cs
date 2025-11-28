@@ -6,6 +6,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container
 builder.Services.AddControllers();
 
+// Load configuration from environment variables
+builder.Configuration.AddEnvironmentVariables();
+
+
 // Configure CORS for frontend
 builder.Services.AddCors(options =>
 {
