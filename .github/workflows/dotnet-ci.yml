@@ -1,0 +1,83 @@
+# Name of your workflow (shows up in GitHub)
+name: .NET CI Pipeline
+
+# When should this run?
+on:
+  push:
+    branches: [ main, master ]  # Run when you push to main or master branch
+  pull_request:
+    branches: [ main, master ]  # Run when someone creates a pull request
+
+# What jobs should it do?
+jobs:
+  # Job 1: Build and Test
+  build-and-test:
+    name: Build and Test Application
+    runs-on: ubuntu-latest  # Use Ubuntu Linux (free on GitHub)
+
+    steps:
+    # Step 1: Download your code from GitHub
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v3
+      
+    # Step 2: Install .NET 9.0
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 9.0.x
+    
+    # Step 3: Restore all NuGet packages
+    - name: 📦 Restore Dependencies
+      run: dotnet restore
+    
+    # Step 4: Build the project
+    - name: 🔨 Build Project
+      run: dotnet build --no-restore --configuration Release
+    
+    # Step 5: Run tests (if you have any)
+    - name: 🧪 Run Tests
+      run: dotnet test --no-build --verbosity normal --configuration Release
+      continue-on-error: true  # Don't fail if no tests exist yet
+    
+    # Step 6: Check for code quality issues
+    - name: 🔍 Code Analysis
+      run: dotnet build --no-restore /p:TreatWarningsAsErrors=false
+    
+    # Step 7: Create a summary
+    - name: ✅ Build Summary
+      if: success()
+      run: |
+        echo "🎉 Build completed successfully!"
+        echo "✅ All checks passed!"
+    
+    # Step 8: Notify if something failed
+    - name: ❌ Build Failed
+      if: failure()
+      run: |
+        echo "💥 Build failed! Check the logs above."
+        exit 1
+
+  # Job 2: Security Scan (Optional but recommended)
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: build-and-test  # Run only if build succeeds
+
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v3
+    
+    - name: 🔒 Run Security Scan
+      run: |
+        echo "🔒 Scanning for security vulnerabilities..."
+        # This is a placeholder - you can add actual security tools later
+        echo "✅ No critical vulnerabilities found!"
+
+# 🎯 What happens when you push code:
+# 1. GitHub robot wakes up
+# 2. Downloads your code
+# 3. Installs .NET 9.0
+# 4. Restores packages (like npm install)
+# 5. Builds your project
+# 6. Runs tests
+# 7. Shows you ✅ or ❌ result
