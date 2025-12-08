@@ -72,12 +72,3 @@ jobs:
         echo "🔒 Scanning for security vulnerabilities..."
         # This is a placeholder - you can add actual security tools later
         echo "✅ No critical vulnerabilities found!"
-
-# 🎯 What happens when you push code:
-# 1. GitHub robot wakes up
-# 2. Downloads your code
-# 3. Installs .NET 9.0
-# 4. Restores packages (like npm install)
-# 5. Builds your project
-# 6. Runs tests
-# 7. Shows you ✅ or ❌ result
