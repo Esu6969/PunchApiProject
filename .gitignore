@@ -21,3 +21,15 @@ appsettings.Development.json
 # Ignore system files
 .DS_Store
 Thumbs.db
+
+# Add these to .gitignore immediately:
+appsetting.json
+appsettings.Development.json
+*.db
+*.json (except package.json)
+verify.txt
+
+# Remove from git history:
+git rm --cached appsetting.json appsettings.Development.json punch_data.db punch_data.json verify.txt
+git commit -m "Remove sensitive files"
+git push
