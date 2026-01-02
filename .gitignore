@@ -1,35 +1,82 @@
-# Ignore build outputs
+# Build outputs
 bin/
 obj/
 
-# Ignore user secrets and environment files
-.env
-appsettings.Development.json
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
 
-# Ignore local database files
+# Configuration files with sensitive data
+appsettings.json
+appsetting.json
+appsettings.*.json
+!appsettings.example.json
+
+# Credentials and secrets
+MY_CREDENTIALS.txt
+.env
+*.pfx
+
+# Database files
 *.db
+*.db-shm
+*.db-wal
 *.sqlite
 *.sqlite3
 *.mdf
+*.ldf
 
-# Ignore Visual Studio Code settings (optional)
+# Backup files
+*.backup
+punch_data.json.backup
+
+# Visual Studio Code
 .vscode/
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
 
-# Ignore logs
+# Visual Studio
+.vs/
+*.rsuser
+
+# Logs
 *.log
+logs/
 
-# Ignore system files
+# System files
 .DS_Store
 Thumbs.db
+Desktop.ini
 
-# Add these to .gitignore immediately:
-appsetting.json
-appsettings.Development.json
-*.db
-*.json (except package.json)
-verify.txt
+# Node modules (for frontend)
+node_modules/
+npm-debug.log*
+yarn-error.log*
 
-# Remove from git history:
-git rm --cached appsetting.json appsettings.Development.json punch_data.db punch_data.json verify.txt
-git commit -m "Remove sensitive files"
-git push
+# Test results
+TestResults/
+*.trx
+
+# Publish profiles
+*.pubxml
+*.publishproj
+
+# NuGet packages (optional)
+*.nupkg
+*.snupkg
+packages/
+
+# Entity Framework
+*.mdf
+*.ldf
+
+# Rider
+.idea/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
