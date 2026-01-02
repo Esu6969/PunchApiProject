@@ -2,7 +2,54 @@
 A full-stack employee attendance system built with ASP.NET Core, React, and PostgreSQL. Includes secure login, employee registration, punch-in/punch-out workflow, modern UI, automated database setup, and complete REST API with Swagger documentation. Production-ready architecture with DTOs, CORS, session support, and health checks.
 
 🚀 Features
+## 🚀 Getting Started
 
+### Prerequisites
+- .NET 8.0 SDK
+- PostgreSQL 14+
+- Node.js 18+ & npm
+- Visual Studio Code or Visual Studio 2022
+
+### Installation
+
+1. Clone the repository
+```bash
+   git clone https://github.com/Esu6969/PunchApiProject.git
+   cd PunchApiProject
+```
+
+2. Configure Database
+   - Create a PostgreSQL database
+   - Copy `appsettings.example.json` to `appsettings.json`
+   - Update connection string with your credentials
+
+3. Install Backend Dependencies
+```bash
+   dotnet restore
+   dotnet ef database update
+```
+
+4. Install Frontend Dependencies
+```bash
+   cd frontend
+   npm install
+```
+
+5. Run the Application
+```bash
+   # Terminal 1 - Backend
+   dotnet run
+
+   # Terminal 2 - Frontend
+   cd frontend
+   npm start
+```
+
+6. Access the Application
+   - Frontend: http://localhost:3000
+   - API: http://localhost:5000
+   - Swagger: http://localhost:5000/swagger
+     
 🔹**Employee Management**
 
 - Employee registration with name, email, department, position, join date, and more.
@@ -53,6 +100,21 @@ A full-stack employee attendance system built with ASP.NET Core, React, and Post
 | Database   | PostgreSQL                   |
 | Tools      | Swagger, Session, CORS, Logging |
 
+
+**🔌 API Endpoints**
+
+### Authentication
+- `POST /api/auth/register` - Register new employee
+- `POST /api/auth/login` - Employee login
+
+### Punch Operations
+- `POST /api/punch/in` - Punch in
+- `POST /api/punch/out` - Punch out
+- `GET /api/punch/records` - Get punch records
+
+### Employee
+- `GET /api/employee/{id}` - Get employee details
+- `PUT /api/employee/{id}` - Update employee info
 
 **📝 Development Notes**
 
