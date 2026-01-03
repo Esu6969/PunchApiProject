@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PunchApiProject.Data;
+using PunchApiProject.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +9,6 @@ builder.Services.AddControllers();
 
 // Load configuration from environment variables
 builder.Configuration.AddEnvironmentVariables();
-
 
 // Configure CORS for frontend
 builder.Services.AddCors(options =>
@@ -29,7 +29,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Configure PostgreSQL Database - Direct connection string
+// Configure PostgreSQL Database - Get from appsettings.json
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 // Configure Npgsql to handle DateTime properly
@@ -37,6 +37,9 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 builder.Services.AddDbContext<PunchDbContext>(options =>
     options.UseNpgsql(connectionString));
+
+// Register PunchService for dependency injection
+builder.Services.AddScoped<IPunchService, PunchService>();
 
 // Add Swagger/OpenAPI for API documentation
 builder.Services.AddEndpointsApiExplorer();
@@ -126,10 +129,8 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var punchDb = scope.ServiceProvider.GetRequiredService<PunchDbContext>();
-        
         // This will create the database and tables if they don't exist
         punchDb.Database.EnsureCreated();
-        
         logger.LogInformation("✅ Database and tables created successfully");
     }
     catch (Exception ex)
