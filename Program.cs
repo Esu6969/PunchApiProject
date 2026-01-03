@@ -30,7 +30,7 @@ builder.Services.AddCors(options =>
 });
 
 // Configure PostgreSQL Database - Direct connection string
-var connectionString = "Host=localhost;Port=6432;Username=Dhruvil;Password=Dhruvil2512;Database=punchdb";
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 // Configure Npgsql to handle DateTime properly
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
