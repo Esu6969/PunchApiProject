@@ -2,8 +2,8 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PunchApiProject.Data;
 
 #nullable disable
@@ -18,81 +18,81 @@ namespace PunchApiProject.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "9.0.7")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("PunchApiProject.Models.Employee", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("datetime2")
                         .HasColumnName("created_at");
 
                     b.Property<string>("Department")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasColumnType("nvarchar(100)")
                         .HasColumnName("department");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("nvarchar(255)")
                         .HasColumnName("email");
 
                     b.Property<string>("EmployeeId")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("employee_id");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasColumnType("nvarchar(100)")
                         .HasColumnName("first_name");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
+                        .HasColumnType("bit")
                         .HasColumnName("is_active");
 
                     b.Property<DateTime>("JoinDate")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("datetime2")
                         .HasColumnName("join_date");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasColumnType("nvarchar(100)")
                         .HasColumnName("last_name");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("nvarchar(255)")
                         .HasColumnName("password_hash");
 
                     b.Property<string>("Phone")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
+                        .HasColumnType("nvarchar(20)")
                         .HasColumnName("phone");
 
                     b.Property<string>("Position")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasColumnType("nvarchar(100)")
                         .HasColumnName("position");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("datetime2")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id");
@@ -110,21 +110,21 @@ namespace PunchApiProject.Migrations
                 {
                     b.Property<int>("ActivityId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("activity_id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ActivityId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ActivityId"));
 
                     b.Property<int>("EmployeeId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("employee_id");
 
                     b.Property<DateTime>("PunchInTime")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("datetime2")
                         .HasColumnName("punch_in_time");
 
                     b.Property<DateTime?>("PunchOutTime")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("datetime2")
                         .HasColumnName("punch_out_time");
 
                     b.HasKey("ActivityId");
@@ -136,23 +136,23 @@ namespace PunchApiProject.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("ActionDateTime")
-                        .HasColumnType("timestamp without time zone")
+                        .HasColumnType("datetime2")
                         .HasColumnName("action_date_time");
 
                     b.Property<string>("ActionType")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
+                        .HasColumnType("nvarchar(20)")
                         .HasColumnName("action_type");
 
                     b.Property<int>("EmployeeId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("employee_id");
 
                     b.HasKey("Id");

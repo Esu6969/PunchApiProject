@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PunchApiProject.Data;
 using PunchApiProject.Services;
+using Microsoft.EntityFrameworkCore.SqlServer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,7 +37,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 builder.Services.AddDbContext<PunchDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Register PunchService for dependency injection
 builder.Services.AddScoped<IPunchService, PunchService>();
