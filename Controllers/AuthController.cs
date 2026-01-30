@@ -167,6 +167,7 @@ namespace PunchApiProject.Controllers
         public string EmployeeId { get; set; } = string.Empty;
         public string? JoinDate { get; set; }
         public string Password { get; set; } = string.Empty;
+        public List<string> Phones { get; set;  } = new List<string>();
     }
 
     public class LoginDto

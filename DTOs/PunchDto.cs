@@ -4,5 +4,6 @@ namespace PunchApiProject.DTOs
     {
         public DateTime PunchInTime { get; set; }
         public DateTime? PunchOutTime { get; set; }
+                                                                
     }
 }

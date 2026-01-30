@@ -12,6 +12,7 @@ namespace PunchApiProject.Data
         public DbSet<Employee> Employees { get; set; } = null!;
         public DbSet<PunchRecord> PunchRecords { get; set; } = null!;
         public DbSet<EmployeeActivity> EmployeeActivities { get; set; } = null!;
+        public DbSet<EmployeeContacts> EmployeeContacts { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -65,6 +66,18 @@ namespace PunchApiProject.Data
                 entity.Property(e => e.EmployeeId).HasColumnName("employee_id").IsRequired();
                 entity.Property(e => e.PunchInTime).HasColumnName("punch_in_time").IsRequired();
                 entity.Property(e => e.PunchOutTime).HasColumnName("punch_out_time");
+            });
+
+            // Configure EmployeeContact table
+            modelBuilder.Entity<EmployeeContacts>(entity =>
+            {
+                entity.ToTable("employee_contacts");
+                entity.HasKey(e => e.EmployeeContactId);
+
+                entity.HasOne(p => p.Employee)
+                     .WithMany(e => e.EmployeeContacts)
+                     .HasForeignKey(p => p.EmployeeId)
+                     .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }
