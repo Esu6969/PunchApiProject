@@ -9,8 +9,6 @@ obj/
 *.sln.docstates
 
 # Configuration files with sensitive data
-appsettings.json
-appsetting.json
 appsettings.*.json
 !appsettings.example.json
 
