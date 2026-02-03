@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;   
+
+
 namespace PunchApiProject.DTOs
 {
     public class PunchDtos

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Dashboard</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">⏱️ Employee Tracker</div>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="avatar">👤</div>
+                <span class="user-name" id="userName">John Doe</span>
+            </div>
+            <button class="logout-btn" id="logoutBtn">Logout</button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <h1>Welcome back, <span id="welcomeName">John</span>! 👋</h1>
+            <p>Track your time and manage your work hours efficiently</p>
+        </div>
+
+        <!-- Punch In/Out Section -->
+        <div class="punch-section">
+            <h2>⏰ Time Tracking</h2>
+            
+            <div class="punch-controls">
+                <button class="punch-btn punch-in-btn" id="punchInBtn">
+                    <span class="punch-btn-icon">🟢</span>
+                    <span>Punch In</span>
+                </button>
+                
+                <button class="punch-btn punch-out-btn" id="punchOutBtn">
+                    <span class="punch-btn-icon">🔴</span>
+                    <span>Punch Out</span>
+                </button>
+            </div>
+
+            <div class="current-status">
+                <div class="status-label">Current Status</div>
+                <div class="status-value" id="currentStatus">Not Clocked In</div>
+                <div class="status-time" id="statusTime"></div>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-label">Hours Today</div>
+                <div class="stat-value" id="hoursToday">0.0</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-label">Hours This Week</div>
+                <div class="stat-value" id="hoursWeek">0.0</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-label">Hours This Month</div>
+                <div class="stat-value" id="hoursMonth">0.0</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-label">Attendance Rate</div>
+                <div class="stat-value" id="attendanceRate">100%</div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="activity-section">
+            <h2>📋 Recent Activity</h2>
+            
+            <div class="activity-list" id="activityList">
+                <div class="activity-item">
+                    <div class="activity-info">
+                        <div class="activity-icon">🟢</div>
+                        <div class="activity-details">
+                            <h4>Punched In</h4>
+                            <p>Started work shift</p>
+                        </div>
+                    </div>
+                    <div class="activity-time">09:00 AM</div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="activity-info">
+                        <div class="activity-icon">🔴</div>
+                        <div class="activity-details">
+                            <h4>Punched Out</h4>
+                            <p>Ended work shift</p>
+                        </div>
+                    </div>
+                    <div class="activity-time">06:00 PM</div>
+                </div>
+
+                <div class="activity-item">
+                    <div class="activity-info">
+                        <div class="activity-icon">📊</div>
+                        <div class="activity-details">
+                            <h4>Report Generated</h4>
+                            <p>Weekly timesheet completed</p>
+                        </div>
+                    </div>
+                    <div class="activity-time">Yesterday</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
