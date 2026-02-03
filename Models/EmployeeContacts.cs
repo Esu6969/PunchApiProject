@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using PunchApiProject.Models;
 
 namespace PunchApiProject.Models
 {
@@ -15,6 +16,6 @@ namespace PunchApiProject.Models
         public string ContactNumber { get; set; } = string.Empty;
 
         [ForeignKey("EmployeeId")]
-        public virtual Employee Employee { get; set; }
+        public virtual Employee Employee { get; set; } = null!;
     }
 }

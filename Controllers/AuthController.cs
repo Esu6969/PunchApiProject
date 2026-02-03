@@ -75,6 +75,19 @@ namespace PunchApiProject.Controllers
                 _context.Employees.Add(employee);
                 await _context.SaveChangesAsync();
 
+            //for loop (phone contact)
+                foreach (var contact in dto.Phones)
+                {
+                    var ec = new EmployeeContacts
+                    {
+                        EmployeeId = employee.Id,
+                        ContactNumber = contact
+                    };
+                    _context.EmployeeContacts.Add(ec);
+                    _context.SaveChanges();
+                }
+
+
                 _logger.LogInformation("Employee registered successfully: {EmployeeId}", employee.EmployeeId);
 
                 return Ok(new

@@ -6,6 +6,6 @@ namespace PunchApiProject.Models
         public int EmployeeId { get; set; }
         public DateTime LoginTime { get; set; } = DateTime.UtcNow;
 
-        public Employee Employee { get; set; }
+        public Employee Employee { get; set; } = null!;
     }
 }
