@@ -58,5 +58,7 @@ namespace PunchApiProject.Models
 
         // Navigation property
         public virtual ICollection<PunchRecord> PunchRecords { get; set; } = new List<PunchRecord>();
+
+        public virtual List<EmployeeContacts> EmployeeContacts { get; set; } = new List<EmployeeContacts>();
     }
 }
