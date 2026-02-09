@@ -1,143 +1,200 @@
-**Employee Punch API Project**
-A full-stack employee attendance system built with ASP.NET Core, React, and PostgreSQL. Includes secure login, employee registration, punch-in/punch-out workflow, modern UI, automated database setup, and complete REST API with Swagger documentation. Production-ready architecture with DTOs, CORS, session support, and health checks.
+**⏱️ Employee Punch API Project**
 
-🚀 Features
-## 🚀 Getting Started
+A full-stack employee attendance management system built using ASP.NET Core, React, and PostgreSQL.
+This project provides secure authentication, employee management, punch-in/punch-out tracking, and a modern responsive UI with production-ready backend architecture.
 
-### Prerequisites
-- .NET 8.0 SDK
+📌 **Overview**
+
+The Employee Punch System helps organizations track employee working hours with secure login, real-time punch tracking, and centralized record management.
+
+It includes:
+
+- Secure employee authentication
+
+- Employee profile management
+
+- Punch In / Punch Out workflow
+
+- Real-time working timer
+
+- RESTful API with Swagger documentation
+
+- Automated database setup
+
+- Production-ready backend architecture
+
+  
+| Layer    | Technology                                      |
+| -------- | ----------------------------------------------- |
+| Frontend | React, JavaScript, CSS                          |
+| Backend  | ASP.NET Core (.NET 8, C#)                       |
+| Database | PostgreSQL / Ms-Sql Server                                     |
+| Tools    | Swagger, CORS, Sessions, Logging, Health Checks |
+
+
+
+
+**🚀 Features**
+**👨‍💼 Employee Management**
+
+- Employee registration with:
+
+- Name
+
+- Email
+
+- Department
+
+- Position
+
+- Join Date
+
+- Duplicate Employee ID & Email validation
+
+- Secure password hashing
+
+
+
+**🔐 Authentication**
+
+- Login using:
+
+- Employee ID
+
+- Email
+
+- JWT authentication ready (extendable for protected routes)
+
+- Session-based state management support
+
+
+
+**⏱️ Punch In / Punch Out System**
+
+- Secure punch-in and punch-out
+
+- Live working duration timer
+
+- Punch-out summary with total work hours
+
+- Real-time dashboard feedback
+
+
+
+**📊 Dashboard**
+
+- Employee profile overview
+
+- Company and work status display
+
+- Modern responsive UI (Desktop optimized)
+
+
+
+**⚙️ Backend Enhancements**
+
+- RESTful API architecture
+
+- DTO-based request/response handling
+
+- Automatic database table creation using EnsureCreated()
+
+- Centralized error handling & logging
+
+- Multi-origin CORS support
+
+- Swagger API documentation
+
+- Health check endpoint
+
+
+
+
+**🎨 Frontend Enhancements**
+
+- Professional Login & Registration UI
+
+- Form validation with clear error messages
+
+- React Router navigation fixes
+
+- DTO-aligned API integration
+
+- Fully responsive layout
+
+
+**🚀 Getting Started**
+**✅ Prerequisites**
+
+- .NET 8 SDK
+
 - PostgreSQL 14+
-- Node.js 18+ & npm
-- Visual Studio Code or Visual Studio 2022
 
-### Installation
+- Node.js 18+
 
-1. Clone the repository
-```bash
-   git clone https://github.com/Esu6969/PunchApiProject.git
-   cd PunchApiProject
-```
+- npm
 
-2. Configure Database
-   - Create a PostgreSQL database
-   - Copy `appsettings.example.json` to `appsettings.json`
-   - Update connection string with your credentials
+- Visual Studio 2022 or VS Code
+  
 
-3. Install Backend Dependencies
-```bash
-   dotnet restore
-   dotnet ef database update
-```
-
-4. Install Frontend Dependencies
-```bash
-   cd frontend
-   npm install
-```
-
-5. Run the Application
-```bash
-   # Terminal 1 - Backend
-   dotnet run
-
-   # Terminal 2 - Frontend
-   cd frontend
-   npm start
-```
-
-6. Access the Application
-   - Frontend: http://localhost:3000
-   - API: http://localhost:5000
-   - Swagger: http://localhost:5000/swagger
-     
-🔹**Employee Management**
-
-- Employee registration with name, email, department, position, join date, and more.
-- Duplicate Employee ID & Email validation.
-- Password hashing for secure storage.
-
-🔹**Authentication**
-
-- Login using Employee ID or Email (string-based ID support).
-- JWT authentication setup for secure access (extensible for protected routes).
-- Session support added for state management.
-
-🔹 **Punch In / Punch Out System**
-
-- Secure punch-in and punch-out functionality.
-- Timer on dashboard to track working duration.
-- Punch-out summary with total hours.
-- Real-time feedback messages.
-
-🔹 **Dashboard**
-
-- View employee profile, company details, and work status.
-- Clean, modern, and responsive design optimized for desktop/laptop.
-
-🔹**Backend Enhancements**
-
-- RESTful API endpoints for registration, login, punch actions, and record retrieval.
-- Automatic table creation on startup using EnsureCreated().
-- Improved error handling and logging.
-- CORS enabled for multiple frontend origins.
-- Swagger UI for API documentation (/swagger).
-- Health check endpoint (/health).
-
-🔹 **Frontend Enhancements**
-
-- Redesigned Login & Registration pages with a professional UI.
-- Form validation with clear error messaging.
-- Routing fixes using React Router.
-- API integration aligned with backend DTOs.
-- Responsive layout for all screens.
-
-## 🧰 Tech Stack
-
-| Layer      | Technologies                 |
-|------------|------------------------------|
-| Frontend   | React, JavaScript, CSS       |
-| Backend    | ASP.NET Core (C#)            |
-| Database   | PostgreSQL                   |
-| Tools      | Swagger, Session, CORS, Logging |
+| Service     | URL                                                            |
+| ----------- | -------------------------------------------------------------- |
+| Frontend    | [http://localhost:3000](http://localhost:3000)                 |
+| Backend API | [http://localhost:5000](http://localhost:5000)                 |
+| Swagger     | [http://localhost:5000/swagger](http://localhost:5000/swagger) |
 
 
 **🔌 API Endpoints**
 
-### Authentication
-- `POST /api/auth/register` - Register new employee
-- `POST /api/auth/login` - Employee login
+**Authentication**
+- POST /api/auth/register
+- POST /api/auth/login
 
-### Punch Operations
-- `POST /api/punch/in` - Punch in
-- `POST /api/punch/out` - Punch out
-- `GET /api/punch/records` - Get punch records
+**Punch Operations**
+- POST /api/punch/in
+- POST /api/punch/out
+- GET  /api/punch/records
 
-### Employee
-- `GET /api/employee/{id}` - Get employee details
-- `PUT /api/employee/{id}` - Update employee info
+**Employee**
+- GET /api/employee/{id}
+- PUT /api/employee/{id}
 
-**📝 Development Notes**
+**🧾 Development Notes**
 
-- CORS supports multiple frontend URLs.
-- Automatic database table creation with EnsureCreated().
-- Session enabled for user state management.
-- Logging added for startup, registration, login, and errors.
-- SPA fallback route serves login.html for React routing support.
-- DTOs for Login & Registration are fully aligned with frontend.
+- Supports multiple frontend URLs via CORS
 
-**🧑‍💻 Future Enhancements**
+- Automatic DB creation on startup
 
-- Complete JWT-based role protection for routes.
-- Admin dashboard for employee management.
-- Export punch data (PDF/Excel).
-- Analytics dashboard for HR (working hours, late logs, etc.).
-- Email notifications for punch reminders.
+- Session enabled for user state
 
-**License**
+- Structured logging for:
 
-- MIT License — free to use, modify, and distribute.
+- Startup
 
+- Authentication
 
+- Errors
 
+- SPA fallback routing for React
 
+- DTOs fully aligned with frontend models
 
+**🔮 Future Enhancements**
+
+- Role-based JWT authorization
+
+- Admin dashboard
+
+- Punch data export (PDF / Excel)
+
+- HR Analytics dashboard
+
+- Email notification system
+
+**📄 License**
+
+- MIT License — Free to use, modify, and distribute.
+
+**👨‍💻 Author**
+
+- Developed by Dhruvil
