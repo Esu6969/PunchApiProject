@@ -5,45 +5,45 @@ A full-stack employee attendance system built with ASP.NET Core, React, and Post
 ## 🚀 Getting Started
 
 ### Prerequisites
-- .NET 8.0 SDK
-- PostgreSQL 14+
+- .NET 9 SDK
+- PostgreSQL 14+ or SQL Server / LocalDB (default in `appsettings.json`)
 - Node.js 18+ & npm
-- Visual Studio Code or Visual Studio 2022
+- Visual Studio Code or Visual Studio 2022 (optional)
 
 ### Installation
 
 1. Clone the repository
-```bash
+   ```bash
    git clone https://github.com/Esu6969/PunchApiProject.git
    cd PunchApiProject
-```
+   ```
 
 2. Configure Database
-   - Create a PostgreSQL database
+   - Create a PostgreSQL or SQL Server database
    - Copy `appsettings.example.json` to `appsettings.json`
    - Update connection string with your credentials
 
 3. Install Backend Dependencies
-```bash
+   ```bash
    dotnet restore
    dotnet ef database update
-```
+   ```
 
 4. Install Frontend Dependencies
-```bash
+   ```bash
    cd frontend
    npm install
-```
+   ```
 
 5. Run the Application
-```bash
+   ```bash
    # Terminal 1 - Backend
    dotnet run
 
    # Terminal 2 - Frontend
    cd frontend
    npm start
-```
+   ```
 
 6. Access the Application
    - Frontend: http://localhost:3000
@@ -97,9 +97,68 @@ A full-stack employee attendance system built with ASP.NET Core, React, and Post
 |------------|------------------------------|
 | Frontend   | React, JavaScript, CSS       |
 | Backend    | ASP.NET Core (C#)            |
-| Database   | PostgreSQL                   |
+| Database   | PostgreSQL or SQL Server     |
 | Tools      | Swagger, Session, CORS, Logging |
 
+## Development Setup and Troubleshooting
+
+This section explains how to run the project locally, configure the database connection, enable EF Core SQL logging for debugging, apply migrations, and useful API endpoints.
+
+### Connection Strings
+
+The application reads connection strings from `appsettings.json`. By default:
+
+```
+"ConnectionStrings": {
+  "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=PunchInOut;Trusted_Connection=True;TrustServerCertificate=True"
+}
+```
+
+You can also add a second connection string named `PunchInOutDataContextConnectionString` if you need a separate database.
+
+### Apply Database Migrations
+
+Recommended: use EF Core migrations so the schema is created and updated reliably.
+
+- Create a migration (if required):
+  - `dotnet ef migrations add InitialCreate`
+- Apply migrations:
+  - `dotnet ef database update`
+
+Alternatively, the application may call `Database.EnsureCreated()` or `Database.Migrate()` at startup to create or migrate the database automatically.
+
+### Enable EF Core SQL Logging (Development Only)
+
+To see SQL statements EF Core executes and (optionally) parameter values, enable logging in `Program.cs`:
+
+```csharp
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<PunchDbContext>(options =>
+    options.UseSqlServer(connectionString)
+           .EnableDetailedErrors()
+           .EnableSensitiveDataLogging(builder.Environment.IsDevelopment())
+           .LogTo(Console.WriteLine, LogLevel.Information));
+```
+
+- `EnableSensitiveDataLogging()` prints parameter values — enable only in development.
+- `LogTo(Console.WriteLine, LogLevel.Information)` writes EF SQL to console and Visual Studio Output window when running the app.
+- Optionally set `Microsoft.EntityFrameworkCore.Database.Command` to `Information` in `appsettings.json` to show DB commands.
+
+### Troubleshooting Tips
+
+- If you don’t see rows in the database, verify the runtime connection string (log it at startup) and check API responses for errors.
+- The `PunchService` methods expect the integer primary key `Id`. The frontend may send the string `EmployeeId` (e.g. `"EMP001"`). The project includes convenience endpoints `POST /api/punch/in/by-employeeid` and `/api/punch/out/by-employeeid` that resolve the string to the integer `Id` server-side.
+- Check browser developer tools (Network tab) to inspect request payloads and API responses.
+
+### Useful Endpoints
+
+- `POST /api/auth/login` — returns `id` (integer) and `employeeId` (string)
+- `POST /api/punch/in` — accepts JSON `{ "employeeId": <integer> }`
+- `POST /api/punch/in/by-employeeid` — accepts JSON `{ "employeeId": "EMP001" }`
+- `POST /api/punch/out` and `POST /api/punch/out/by-employeeid` — analogous to punch in
+- `GET /api/punch/records/{employeeId}` — returns records for integer `employeeId`
+- `GET /api/employee` — list employees
 
 **🔌 API Endpoints**
 
@@ -136,6 +195,10 @@ A full-stack employee attendance system built with ASP.NET Core, React, and Post
 **License**
 
 - MIT License — free to use, modify, and distribute.
+
+
+
+
 
 
 

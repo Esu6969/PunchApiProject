@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Database Name="PunchInOut" EntityNamespace="PunchInOutContext" ContextNamespace="PunchInOutContext" Class="PunchInOutDataContext" xmlns:ed="http://devart.com/schemas/EntityDeveloper/1.0" ed:Guid="4ed62ba5-4917-4988-aef6-a0dd4e3c41e5" Provider="Devart.Data.SqlServer.Linq.Provider.SqlDataProvider, Devart.Data.SqlServer.Linq" Extended="true" xmlns="http://schemas.devart.com/linqconnect/mapping">
+  <Connection Mode="ConnectionString" ConnectionString="Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=PunchInOut;Integrated Security=True;Persist Security Info=False;Password=" Provider="System.Data.SqlClient" />
+  <Table Name="dbo.[__EFMigrationsHistory]" Member="EFMigrationsHistories">
+    <Type Name="EFMigrationsHistory" ed:Guid="59bde034-1c64-45bc-8b1c-854f341ad868">
+      <Column Name="MigrationId" Type="System.String" DbType="NVARCHAR(150) NOT NULL" IsPrimaryKey="true" CanBeNull="false" UpdateCheck="Always" MaxLength="150" Unicode="true" ed:ValidateMaxLength="150" ed:ValidateRequired="true" ed:Guid="08f375e5-1b31-4d5a-ad73-31d4bfb8186c" />
+      <Column Name="ProductVersion" Type="System.String" DbType="NVARCHAR(32) NOT NULL" CanBeNull="false" UpdateCheck="Never" MaxLength="32" Unicode="true" ed:ValidateMaxLength="32" ed:ValidateRequired="true" ed:Guid="e10ccc66-f5b4-4868-aa43-70b32fb397f4" />
+    </Type>
+  </Table>
+  <Table Name="dbo.EMP" Member="EMPs">
+    <Type Name="EMP" ed:Guid="5c83e7ce-5645-47b3-bf6a-2c3e21710acf">
+      <Column Name="EMP_ID" Member="EMPID" Type="System.Int32" AutoSync="OnInsert" DbType="INT NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" UpdateCheck="Always" Precision="10" ed:ValidateRequired="true" ed:Guid="6e98b2a4-e271-4ae4-a44a-e487d86a4eaf" />
+      <Column Name="gender" Member="Gender" Type="System.String" DbType="VARCHAR(10) NOT NULL" CanBeNull="false" UpdateCheck="Never" MaxLength="10" ed:ValidateMaxLength="10" ed:ValidateRequired="true" ed:Guid="f7378bcd-6273-4646-b35c-7cd67edd7e83" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Employee" Member="Employees">
+    <Type Name="Employee" ed:Guid="ab1f05b6-7860-4900-9a28-a2207fddbe31">
+      <Column Name="Emp_id" Member="EmpId" Type="System.String" DbType="VARCHAR(1) NOT NULL" IsPrimaryKey="true" CanBeNull="false" UpdateCheck="Always" MaxLength="1" ed:ValidateMaxLength="1" ed:ValidateRequired="true" ed:Guid="3aa9a8ac-98a0-41d5-bf64-dba41fedfa47" />
+      <Column Name="Emp_name" Member="EmpName" Type="System.Int32" DbType="INT" CanBeNull="true" UpdateCheck="Never" Precision="10" ed:ValidateRequired="false" ed:Guid="55cfeb08-44b1-4c73-a210-a41b0bd3fb1a" />
+      <Column Name="Emp_dept" Member="EmpDept" Type="System.Int32" DbType="INT" CanBeNull="true" UpdateCheck="Never" Precision="10" ed:ValidateRequired="false" ed:Guid="c7c800a9-5b1c-46a8-a703-c671bff6e0f1" />
+      <Column Name="age" Member="Age" Type="System.Int32" DbType="INT" CanBeNull="true" UpdateCheck="Never" Precision="10" ed:ValidateRequired="false" ed:Guid="ac3eff31-89f7-42bd-9924-a7a4a4ce0c2b" />
+    </Type>
+  </Table>
+  <Table Name="dbo.employee_activities" Member="EmployeeActivities">
+    <Type Name="EmployeeActivity" ed:Guid="6c6912a7-7134-4a18-a74b-5b323a1c3afc">
+      <Column Name="activity_id" Member="ActivityId" Type="System.Int32" AutoSync="OnInsert" DbType="INT NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" UpdateCheck="Always" Precision="10" ed:ValidateRequired="true" ed:Guid="321f250a-4528-41c5-a3a9-8db83a9154e7" />
+      <Column Name="employee_id" Member="EmployeeId" Type="System.Int32" DbType="INT NOT NULL" CanBeNull="false" UpdateCheck="Never" Precision="10" ed:ValidateRequired="true" ed:Guid="88b559a0-4197-43cc-abfb-2363cc2f62b9" />
+      <Column Name="punch_in_time" Member="PunchInTime" Type="System.DateTime" DbType="DATETIME2 NOT NULL" CanBeNull="false" UpdateCheck="Never" ed:ValidateRequired="true" ed:Guid="619aa0e0-52d5-496e-8fdd-94a5254c18fd" />
+      <Column Name="punch_out_time" Member="PunchOutTime" Type="System.DateTime" DbType="DATETIME2" CanBeNull="true" UpdateCheck="Never" ed:ValidateRequired="false" ed:Guid="b85dcbab-8b0c-4294-bb0d-6cbeed6d1514" />
+    </Type>
+  </Table>
+  <Table Name="dbo.employee_contacts" Member="EmployeeContacts">
+    <Type Name="EmployeeContact" ed:Guid="1a978958-d7ec-4214-af32-a976dc1fb485">
+      <Column Name="EmployeeContactId" Type="System.Int32" AutoSync="OnInsert" DbType="INT NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" UpdateCheck="Always" Precision="10" ed:ValidateRequired="true" ed:Guid="1a9891b8-a406-4d02-962c-782e94f45027" />
+      <Column Name="EmployeeId" Type="System.Int32" DbType="INT NOT NULL" CanBeNull="false" UpdateCheck="Never" Precision="10" ed:ValidateRequired="true" ed:Guid="b7bb01ec-74f3-447d-bb6a-8294e7164edb" />
+      <Column Name="ContactNumber" Type="System.String" DbType="NVARCHAR(MAX) NOT NULL" CanBeNull="false" UpdateCheck="Never" Unicode="true" ed:ValidateRequired="true" ed:Guid="ce106ef9-9c85-4ee6-8473-22d2b8c1e66d" />
+      <Association Name="Employee1_EmployeeContact" ed:AssociationGuid="41cf19b7-228c-4ee8-87ea-4a3a7b5d89a0" Member="Employee1" ed:Guid="bd31c04f-9399-41db-9dec-eb4be26a161c" ThisKey="EmployeeId" OtherKey="Id" Type="Employee1" DeleteRule="CASCADE" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.employees" Member="Employee1s">
+    <Type Name="Employee1" ed:Guid="61b462c7-f392-4c76-b689-1f962f8e7dd4">
+      <Column Name="id" Member="Id" Type="System.Int32" AutoSync="OnInsert" DbType="INT NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" UpdateCheck="Always" Precision="10" ed:ValidateRequired="true" ed:Guid="b99bbf8d-55b7-4e8b-8767-58f29b57f2f0" />
+      <Column Name="employee_id" Member="EmployeeId" Type="System.String" DbType="NVARCHAR(50) NOT NULL" CanBeNull="false" UpdateCheck="Never" MaxLength="50" Unicode="true" ed:ValidateMaxLength="50" ed:ValidateRequired="true" ed:Guid="71ec1828-7c9e-4618-b108-7978ffdd855a" />
+      <Column Name="first_name" Member="FirstName" Type="System.String" DbType="NVARCHAR(100) NOT NULL" CanBeNull="false" UpdateCheck="Never" MaxLength="100" Unicode="true" ed:ValidateMaxLength="100" ed:ValidateRequired="true" ed:Guid="5b0705ed-7237-414f-9140-bd33c5c04a68" />
+      <Column Name="last_name" Member="LastName" Type="System.String" DbType="NVARCHAR(100) NOT NULL" CanBeNull="false" UpdateCheck="Never" MaxLength="100" Unicode="true" ed:ValidateMaxLength="100" ed:ValidateRequired="true" ed:Guid="b20b6228-85cc-4d65-843f-5a492b3112c6" />
+      <Column Name="email" Member="Email" Type="System.String" DbType="NVARCHAR(255) NOT NULL" CanBeNull="false" UpdateCheck="Never" MaxLength="255" Unicode="true" ed:ValidateMaxLength="255" ed:ValidateRequired="true" ed:Guid="e4c0f177-b07d-4a16-94cb-7cda760b3cfa" />
+      <Column Name="phone" Member="Phone" Type="System.String" DbType="NVARCHAR(20) NOT NULL" CanBeNull="false" UpdateCheck="Never" MaxLength="20" Unicode="true" ed:ValidateMaxLength="20" ed:ValidateRequired="true" ed:Guid="171d0731-0a6b-4fca-afaf-88720600b506" />
+      <Column Name="department" Member="Department" Type="System.String" DbType="NVARCHAR(100) NOT NULL" CanBeNull="false" UpdateCheck="Never" MaxLength="100" Unicode="true" ed:ValidateMaxLength="100" ed:ValidateRequired="true" ed:Guid="1b89988d-16b9-4d0e-8f7c-5869d4c06652" />
+      <Column Name="position" Member="Position" Type="System.String" DbType="NVARCHAR(100) NOT NULL" CanBeNull="false" UpdateCheck="Never" MaxLength="100" Unicode="true" ed:ValidateMaxLength="100" ed:ValidateRequired="true" ed:Guid="b9a1df30-2f72-4de0-8da2-f7dd07a54dd9" />
+      <Column Name="password_hash" Member="PasswordHash" Type="System.String" DbType="NVARCHAR(255) NOT NULL" CanBeNull="false" UpdateCheck="Never" MaxLength="255" Unicode="true" ed:ValidateMaxLength="255" ed:ValidateRequired="true" ed:Guid="afcce449-b94b-44be-ba54-b070440e1a7a" />
+      <Column Name="join_date" Member="JoinDate" Type="System.DateTime" DbType="DATETIME2 NOT NULL" CanBeNull="false" UpdateCheck="Never" ed:ValidateRequired="true" ed:Guid="5d09fea6-6cb8-42b5-8119-17a5f7a689ef" />
+      <Column Name="is_active" Member="IsActive" Type="System.Boolean" DbType="BIT NOT NULL" CanBeNull="false" UpdateCheck="Never" ed:ValidateRequired="true" ed:Guid="848c8412-825e-4c5f-be86-411396761090" />
+      <Column Name="created_at" Member="CreatedAt" Type="System.DateTime" DbType="DATETIME2 NOT NULL" CanBeNull="false" UpdateCheck="Never" ed:ValidateRequired="true" ed:Guid="9dc1de3b-3a2e-412b-8931-05450d58df6c" />
+      <Column Name="updated_at" Member="UpdatedAt" Type="System.DateTime" DbType="DATETIME2 NOT NULL" CanBeNull="false" UpdateCheck="Never" ed:ValidateRequired="true" ed:Guid="eb9c4729-99ee-4d4c-81d4-af4bf9a010ef" />
+      <Association Name="Employee1_EmployeeContact" ed:AssociationGuid="41cf19b7-228c-4ee8-87ea-4a3a7b5d89a0" Member="EmployeeContacts" ed:Guid="1886d10b-c90e-4a52-b035-7118db1a0a07" ThisKey="Id" OtherKey="EmployeeId" Type="EmployeeContact" />
+      <Association Name="Employee1_PunchRecord" ed:AssociationGuid="a816af7a-f3d8-49c7-a386-01810246237c" Member="PunchRecords" ed:Guid="d64bcc69-7c6b-4ce1-af69-5ef0e98add74" ThisKey="Id" OtherKey="EmployeeId" Type="PunchRecord" />
+    </Type>
+  </Table>
+  <Table Name="dbo.punch_records" Member="PunchRecords">
+    <Type Name="PunchRecord" ed:Guid="55685e78-3848-4481-ba5e-284d1f853e0b">
+      <Column Name="id" Member="Id" Type="System.Int32" AutoSync="OnInsert" DbType="INT NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" UpdateCheck="Always" Precision="10" ed:ValidateRequired="true" ed:Guid="837217d5-21b6-4e49-aea6-696bb8b61f80" />
+      <Column Name="employee_id" Member="EmployeeId" Type="System.Int32" DbType="INT NOT NULL" CanBeNull="false" UpdateCheck="Never" Precision="10" ed:ValidateRequired="true" ed:Guid="169af144-131c-4cfb-a0c1-6a0f9bc9c843" />
+      <Column Name="action_date_time" Member="ActionDateTime" Type="System.DateTime" DbType="DATETIME2 NOT NULL" CanBeNull="false" UpdateCheck="Never" ed:ValidateRequired="true" ed:Guid="a2a4cea5-c75b-49ed-8734-299a24512dda" />
+      <Column Name="action_type" Member="ActionType" Type="System.String" DbType="NVARCHAR(20) NOT NULL" CanBeNull="false" UpdateCheck="Never" MaxLength="20" Unicode="true" ed:ValidateMaxLength="20" ed:ValidateRequired="true" ed:Guid="b392664d-42cd-4e74-8d67-c4bb7e42fa85" />
+      <Association Name="Employee1_PunchRecord" ed:AssociationGuid="a816af7a-f3d8-49c7-a386-01810246237c" Member="Employee1" ed:Guid="d63913bd-ad79-4f93-8f13-8e784fa3ae15" ThisKey="EmployeeId" OtherKey="Id" Type="Employee1" DeleteRule="CASCADE" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.[|Managers]" Member="Managers">
+    <Type Name="Manager" ed:Guid="1d24e6b8-3e41-44d4-b53b-6464c1674123">
+      <Column Name="MId" Type="System.Int32" DbType="INT NOT NULL" IsPrimaryKey="true" CanBeNull="false" UpdateCheck="Always" Precision="10" ed:ValidateRequired="true" ed:Guid="41578164-99bb-4141-b322-956db3de15a9" />
+      <Column Name="ManagerName" Type="System.String" DbType="NVARCHAR(MAX) NOT NULL" CanBeNull="false" UpdateCheck="Never" Unicode="true" ed:ValidateRequired="true" ed:Guid="614916f8-abc3-4031-94d4-7079f8f1eeae" />
+      <Column Name="Salary" Type="System.Int32" DbType="INT NOT NULL" CanBeNull="false" UpdateCheck="Never" Precision="10" ed:ValidateRequired="true" ed:Guid="2a08f252-e702-4ca6-a6f9-5d827d9e40c3" />
+    </Type>
+  </Table>
+</Database>

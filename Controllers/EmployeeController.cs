@@ -1,9 +1,12 @@
+﻿// Controllers/EmployeeController.cs
+// ✅ No manual session checks needed anywhere in this file
+//    SessionMiddleware handles it automatically for all routes
+
 using Microsoft.AspNetCore.Mvc;
 using PunchApiProject.Services;
 using PunchApiProject.Models;
 using PunchApiProject.DTOs;
-using System;
-using System.Threading.Tasks;
+using PunchApiProject.Middleware; // ✅ import for session extensions
 
 namespace PunchApiProject.Controllers
 {
@@ -21,17 +24,22 @@ namespace PunchApiProject.Controllers
         }
 
         // GET: api/employee
+        // ✅ No session check needed — middleware handles it automatically
         [HttpGet]
         public async Task<IActionResult> GetAllEmployees()
         {
             try
             {
+                // ✅ Optionally read who is making the request from session
+                var callerName = HttpContext.GetSessionEmployeeName();
+                _logger.LogInformation("GetAllEmployees called by: {Name}", callerName);
+
                 var employees = await _employeeService.GetAllEmployeesAsync();
                 return Ok(employees);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to get all employees");
+                _logger.LogError(ex, "Failed to get employees");
                 return StatusCode(500, new { message = "Failed to retrieve employees", error = ex.Message });
             }
         }
@@ -43,11 +51,9 @@ namespace PunchApiProject.Controllers
             try
             {
                 var employee = await _employeeService.GetEmployeeByIdAsync(id);
-                
+
                 if (employee == null)
-                {
                     return NotFound(new { message = "Employee not found" });
-                }
 
                 return Ok(employee);
             }
@@ -65,9 +71,7 @@ namespace PunchApiProject.Controllers
             try
             {
                 if (!ModelState.IsValid)
-                {
                     return BadRequest(ModelState);
-                }
 
                 var newEmployee = await _employeeService.AddEmployeeAsync(employee);
                 return CreatedAtAction(nameof(GetEmployeeById), new { id = newEmployee.Id }, newEmployee);
@@ -86,21 +90,15 @@ namespace PunchApiProject.Controllers
             try
             {
                 if (id != employee.Id)
-                {
                     return BadRequest(new { message = "ID mismatch" });
-                }
 
                 if (!ModelState.IsValid)
-                {
                     return BadRequest(ModelState);
-                }
 
                 var updatedEmployee = await _employeeService.UpdateEmployeeAsync(employee);
-                
+
                 if (updatedEmployee == null)
-                {
                     return NotFound(new { message = "Employee not found" });
-                }
 
                 return Ok(updatedEmployee);
             }
@@ -118,11 +116,9 @@ namespace PunchApiProject.Controllers
             try
             {
                 var result = await _employeeService.DeleteEmployeeAsync(id);
-                
+
                 if (!result)
-                {
                     return NotFound(new { message = "Employee not found" });
-                }
 
                 return Ok(new { message = "Employee deleted successfully" });
             }
@@ -140,16 +136,12 @@ namespace PunchApiProject.Controllers
             try
             {
                 if (!ModelState.IsValid)
-                {
                     return BadRequest(ModelState);
-                }
 
                 var result = await _employeeService.RegisterAsync(request);
 
                 if (!result.Success)
-                {
                     return BadRequest(result);
-                }
 
                 return Ok(result);
             }
@@ -171,10 +163,36 @@ namespace PunchApiProject.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to get employee activities");
+                _logger.LogError(ex, "Failed to get activities");
                 return StatusCode(500, new { message = "Failed to retrieve activities", error = ex.Message });
             }
         }
-        
+
+        // GET: api/employee/me/info
+        // ✅ Get current logged-in employee's own info using session
+        [HttpGet("me/info")]
+        public async Task<IActionResult> GetMyInfo()
+        {
+            try
+            {
+                // ✅ Read id from session — no need to pass id in URL
+                var id = HttpContext.GetSessionId();
+
+                if (id == null)
+                    return Unauthorized(new { message = "Session invalid" });
+
+                var employee = await _employeeService.GetEmployeeByIdAsync(id.Value);
+
+                if (employee == null)
+                    return NotFound(new { message = "Employee not found" });
+
+                return Ok(employee);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get own info");
+                return StatusCode(500, new { message = "Failed to retrieve info", error = ex.Message });
+            }
+        }
     }
 }

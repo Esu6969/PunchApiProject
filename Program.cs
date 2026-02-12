@@ -1,17 +1,17 @@
+// Program.cs
+
 using Microsoft.EntityFrameworkCore;
 using PunchApiProject.Data;
 using PunchApiProject.Services;
-using Microsoft.EntityFrameworkCore.SqlServer;
+using PunchApiProject.Middleware; // ✅ import middleware namespace
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
+// ── Services ────────────────────────────────────────────────
 builder.Services.AddControllers();
-
-// Load configuration from environment variables
 builder.Configuration.AddEnvironmentVariables();
 
-// Configure CORS for frontend
+// ✅ CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -30,19 +30,26 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Configure PostgreSQL Database - Get from appsettings.json
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-// Configure Npgsql to handle DateTime properly
+// ✅ Database
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-
 builder.Services.AddDbContext<PunchDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Register PunchService for dependency injection
+// ✅ Application Services
 builder.Services.AddScoped<IPunchService, PunchService>();
 
-// Add Swagger/OpenAPI for API documentation
+// ✅ Session — 30 minute timeout
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.Name = ".PunchApp.Session";
+});
+
+// ✅ Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -54,18 +61,10 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Add Session support
-builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
-
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// ── Middleware Pipeline (ORDER IS CRITICAL) ──────────────────
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -82,31 +81,28 @@ else
     app.UseHsts();
 }
 
-// Enable static files
-app.UseStaticFiles();
-
-// Enable default files
 app.UseDefaultFiles(new DefaultFilesOptions
 {
     DefaultFileNames = new List<string> { "login.html", "index.html" }
 });
 
-// Use CORS
-app.UseCors("AllowFrontend");
+app.UseStaticFiles();           // 1️⃣ Serve static files first
 
-// Enable Session
-app.UseSession();
+app.UseRouting();               // 2️⃣ Routing
 
-// Enable routing
-app.UseRouting();
+app.UseCors("AllowFrontend");   // 3️⃣ CORS
 
-// Enable Authorization
-app.UseAuthorization();
+app.UseSession();               // 4️⃣ Session (must be before middleware)
 
-// Map Controllers
-app.MapControllers();
+app.UseSessionValidation();     // 5️⃣ ✅ Our custom session middleware
+                                //    automatically checks session on all
+                                //    protected routes — no manual checks needed
 
-// Health check endpoint
+app.UseAuthorization();         // 6️⃣ Authorization
+
+app.MapControllers();           // 7️⃣ Controllers
+
+// Health check — public route (no session needed)
 app.MapGet("/health", () => Results.Ok(new
 {
     status = "healthy",
@@ -114,30 +110,27 @@ app.MapGet("/health", () => Results.Ok(new
     environment = app.Environment.EnvironmentName
 }));
 
-// Fallback route for SPA
 app.MapFallbackToFile("login.html");
 
-// Log startup information
+// ── Startup Logs ─────────────────────────────────────────────
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
-logger.LogInformation("🚀 Employee Punch Tracking System Started");
-logger.LogInformation("📍 Environment: {Environment}", app.Environment.EnvironmentName);
-logger.LogInformation("🌐 Swagger UI: http://localhost:5031/swagger");
-logger.LogInformation("🔐 Login Page: http://localhost:5031/login.html");
+logger.LogInformation("Application Started");
+logger.LogInformation("Swagger: http://localhost:5031/swagger");
+logger.LogInformation("Login:   http://localhost:5031/login.html");
 
-// Create database and tables if they don't exist
+// ── Database Setup ────────────────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
     try
     {
         var punchDb = scope.ServiceProvider.GetRequiredService<PunchDbContext>();
-        // This will create the database and tables if they don't exist
         punchDb.Database.EnsureCreated();
-        logger.LogInformation("✅ Database and tables created successfully");
+        logger.LogInformation("Database ready");
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "❌ Error creating database tables: {Message}", ex.Message);
-        logger.LogWarning("⚠️  Application will continue without database. Fix connection and restart.");
+        logger.LogError(ex, "Database error: {Message}", ex.Message);
+        logger.LogWarning("Application started without database. Fix connection and restart.");
     }
 }
 

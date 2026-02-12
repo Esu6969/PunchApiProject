@@ -49,8 +49,8 @@ namespace PunchApiProject.Data
                 entity.Property(p => p.Id).HasColumnName("id").ValueGeneratedOnAdd();
                 entity.Property(p => p.EmployeeId).HasColumnName("employee_id").IsRequired();
                 entity.Property(p => p.ActionDateTime).HasColumnName("action_date_time").IsRequired();
-                entity.Property(p => p.ActionType).HasColumnName("action_type").IsRequired().HasMaxLength(20);
-                
+                entity.Property(p => p.ActionType).HasColumnName("action_type").IsRequired().HasMaxLength(10);
+
                 entity.HasOne(p => p.Employee)
                       .WithMany(e => e.PunchRecords)
                       .HasForeignKey(p => p.EmployeeId)

@@ -10,7 +10,7 @@ window.onload = function() {
         return;
     }
 
-    // Parse employee data
+    // Parse user data and update UI
     const userData = JSON.parse(employeeData);
     console.log('Logged in user:', userData);
     
@@ -18,7 +18,7 @@ window.onload = function() {
     document.getElementById('userName').textContent = userData.name || 'Employee';
     document.getElementById('welcomeName').textContent = (userData.name || 'Employee').split(' ')[0];
     
-    // Load user stats
+    // Load user stats 
     loadStats(userData);
     updateClock();
     setInterval(updateClock, 1000);
@@ -41,7 +41,7 @@ async function punchIn(userData) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                employeeId: parseInt(userData.employeeId) || userData.id || 1, // Convert to integer
+                employeeId: userData.id || 1, // Convert to integer
                 timestamp: new Date().toISOString()
             })
         });
@@ -75,7 +75,7 @@ async function punchOut(userData) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                employeeId: parseInt(userData.employeeId) || userData.id || 1, // Convert to integer
+                employeeId: userData.id || 1, // Convert to integer
                 timestamp: new Date().toISOString()
             })
         });
