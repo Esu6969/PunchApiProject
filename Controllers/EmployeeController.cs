@@ -3,10 +3,9 @@
 //    SessionMiddleware handles it automatically for all routes
 
 using Microsoft.AspNetCore.Mvc;
-using PunchApiProject.Services;
-using PunchApiProject.Models;
 using PunchApiProject.DTOs;
-using PunchApiProject.Middleware; // ✅ import for session extensions
+using PunchApiProject.Models;
+using PunchApiProject.Services.Interfaces;
 
 namespace PunchApiProject.Controllers
 {
@@ -15,17 +14,21 @@ namespace PunchApiProject.Controllers
     public class EmployeeController : ControllerBase
     {
         private readonly IEmployeeService _employeeService;
+        private readonly IReportService _reportService;
         private readonly ILogger<EmployeeController> _logger;
 
-        public EmployeeController(IEmployeeService employeeService, ILogger<EmployeeController> logger)
+        public EmployeeController(IEmployeeService employeeService, IReportService reportService, ILogger<EmployeeController> logger)
         {
             _employeeService = employeeService;
+            _reportService = reportService;
             _logger = logger;
         }
 
-        // GET: api/employee
-        // ✅ No session check needed — middleware handles it automatically
+        /// <summary>
+        /// Get all employees
+        /// </summary>
         [HttpGet]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<Employee>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAllEmployees()
         {
             try
@@ -44,12 +47,19 @@ namespace PunchApiProject.Controllers
             }
         }
 
-        // GET: api/employee/{id}
+        /// <summary>
+        /// Get employee by ID
+        /// </summary>
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(ApiResponse<Employee>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetEmployeeById(int id)
         {
             try
             {
+                if (id <= 0)
+                    return BadRequest(new ApiResponse { Success = false, Message = "Valid ID is required" });
+
                 var employee = await _employeeService.GetEmployeeByIdAsync(id);
 
                 if (employee == null)
@@ -64,14 +74,69 @@ namespace PunchApiProject.Controllers
             }
         }
 
-        // POST: api/employee
+        /// <summary>
+        /// Get employee by Employee ID
+        /// </summary>
+        [HttpGet("by-id/{employeeId}")]
+        [ProducesResponseType(typeof(ApiResponse<Employee>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetEmployeeByEmployeeId(string employeeId)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(employeeId))
+                    return BadRequest(new ApiResponse { Success = false, Message = "Employee ID is required" });
+
+                var employee = await _employeeService.GetEmployeeByEmployeeIdAsync(employeeId);
+
+                if (employee == null)
+                    return NotFound(new { message = "Employee not found" });
+
+                return Ok(employee);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get employee by Employee ID {EmployeeId}", employeeId);
+                return StatusCode(500, new { message = "Failed to retrieve employee", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Add new employee
+        /// </summary>
         [HttpPost]
-        public async Task<IActionResult> CreateEmployee([FromBody] Employee employee)
+        [ProducesResponseType(typeof(ApiResponse<Employee>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> AddEmployee([FromBody] EmployeeRegistrationDto dto)
         {
             try
             {
                 if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+                {
+                    var errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage));
+                    return BadRequest(new ApiResponse
+                    {
+                        Success = false,
+                        Message = "Validation failed",
+                        Errors = errors.ToList()
+                    });
+                }
+
+                var employee = new Employee
+                {
+                    EmployeeId = dto.EmployeeId,
+                    FirstName = dto.FirstName,
+                    LastName = dto.LastName,
+                    Email = dto.Email,
+                    Phone = dto.Phone ?? "",
+                    Department = dto.Department,
+                    Position = dto.Position,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
+                    JoinDate = string.IsNullOrEmpty(dto.JoinDate)
+                        ? DateTime.UtcNow
+                        : DateTime.Parse(dto.JoinDate),
+                    IsActive = true
+                };
 
                 var newEmployee = await _employeeService.AddEmployeeAsync(employee);
                 return CreatedAtAction(nameof(GetEmployeeById), new { id = newEmployee.Id }, newEmployee);
@@ -83,19 +148,31 @@ namespace PunchApiProject.Controllers
             }
         }
 
-        // PUT: api/employee/{id}
+        /// <summary>
+        /// Update employee
+        /// </summary>
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateEmployee(int id, [FromBody] Employee employee)
+        [ProducesResponseType(typeof(ApiResponse<Employee>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateEmployee(int id, [FromBody] EmployeeUpdateDto dto)
         {
             try
             {
-                if (id != employee.Id)
-                    return BadRequest(new { message = "ID mismatch" });
+                if (id <= 0)
+                    return BadRequest(new ApiResponse { Success = false, Message = "Valid ID is required" });
 
                 if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+                {
+                    var errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage));
+                    return BadRequest(new ApiResponse
+                    {
+                        Success = false,
+                        Message = "Validation failed",
+                        Errors = errors.ToList()
+                    });
+                }
 
-                var updatedEmployee = await _employeeService.UpdateEmployeeAsync(employee);
+                var updatedEmployee = await _employeeService.UpdateEmployeeAsync(id, dto);
 
                 if (updatedEmployee == null)
                     return NotFound(new { message = "Employee not found" });
@@ -109,12 +186,19 @@ namespace PunchApiProject.Controllers
             }
         }
 
-        // DELETE: api/employee/{id}
+        /// <summary>
+        /// Delete employee (soft delete)
+        /// </summary>
         [HttpDelete("{id}")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
             try
             {
+                if (id <= 0)
+                    return BadRequest(new ApiResponse { Success = false, Message = "Valid ID is required" });
+
                 var result = await _employeeService.DeleteEmployeeAsync(id);
 
                 if (!result)
@@ -129,69 +213,51 @@ namespace PunchApiProject.Controllers
             }
         }
 
-        // POST: api/employee/register
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] EmployeeRegisterDto request)
+        /// <summary>
+        /// Get employee attendance report
+        /// </summary>
+        [HttpGet("{employeeId}/attendance")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAttendanceReport(int employeeId, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+                if (employeeId <= 0)
+                    return BadRequest(new { success = false, message = "Valid Employee ID is required" });
 
-                var result = await _employeeService.RegisterAsync(request);
-
-                if (!result.Success)
-                    return BadRequest(result);
-
-                return Ok(result);
+                return Ok(await _reportService.GetEmployeeAttendanceAsync(employeeId, startDate, endDate));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Registration failed for {EmployeeId}", request.EmployeeId);
-                return StatusCode(500, new { message = "Registration failed", error = ex.Message });
+                _logger.LogError(ex, "Failed to get attendance report for EmployeeId {EmployeeId}", employeeId);
+                return StatusCode(500, new { message = "Failed to generate report", error = ex.Message });
             }
         }
 
-        // GET: api/employee/activities
-        [HttpGet("activities")]
-        public async Task<IActionResult> GetEmployeeActivities()
+        /// <summary>
+        /// Download monthly report as CSV
+        /// </summary>
+        [HttpGet("{employeeId}/report/monthly")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DownloadMonthlyReport(int employeeId, [FromQuery] int month, [FromQuery] int year)
         {
             try
             {
-                var activities = await _employeeService.GetAllEmployeeActivityAsync();
-                return Ok(activities);
+                if (employeeId <= 0)
+                    return BadRequest(new { success = false, message = "Valid Employee ID is required" });
+
+                var reportData = await _reportService.GenerateMonthlyReportAsync(employeeId, month, year);
+
+                if (reportData.Length == 0)
+                    return NotFound(new { success = false, message = "No data found for the specified period" });
+
+                return File(reportData, "text/csv", $"punch_report_{month}_{year}.csv");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to get activities");
-                return StatusCode(500, new { message = "Failed to retrieve activities", error = ex.Message });
-            }
-        }
-
-        // GET: api/employee/me/info
-        // ✅ Get current logged-in employee's own info using session
-        [HttpGet("me/info")]
-        public async Task<IActionResult> GetMyInfo()
-        {
-            try
-            {
-                // ✅ Read id from session — no need to pass id in URL
-                var id = HttpContext.GetSessionId();
-
-                if (id == null)
-                    return Unauthorized(new { message = "Session invalid" });
-
-                var employee = await _employeeService.GetEmployeeByIdAsync(id.Value);
-
-                if (employee == null)
-                    return NotFound(new { message = "Employee not found" });
-
-                return Ok(employee);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to get own info");
-                return StatusCode(500, new { message = "Failed to retrieve info", error = ex.Message });
+                _logger.LogError(ex, "Failed to download monthly report for EmployeeId {EmployeeId}, Month {Month}, Year {Year}", employeeId, month, year);
+                return StatusCode(500, new { message = "Failed to download report", error = ex.Message });
             }
         }
     }

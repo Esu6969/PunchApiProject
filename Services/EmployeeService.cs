@@ -1,78 +1,136 @@
 using Microsoft.EntityFrameworkCore;
 using PunchApiProject.Data;
+using PunchApiProject.DTOs;
 using PunchApiProject.Models;
-using PunchApiProject.DTOs;  // ← CHANGED
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using PunchApiProject.Services.Interfaces;
+using BCrypt.Net;
 
 namespace PunchApiProject.Services
 {
     public class EmployeeService : IEmployeeService
     {
         private readonly PunchDbContext _context;
+        private readonly ILogger<EmployeeService> _logger;
+        private readonly IAuditService _auditService;
 
-        public EmployeeService(PunchDbContext context)
+        public EmployeeService(PunchDbContext context, ILogger<EmployeeService> logger, IAuditService auditService)
         {
             _context = context;
+            _logger = logger;
+            _auditService = auditService;
         }
 
-        public async Task<IEnumerable<Employee>> GetAllEmployeesAsync()
+        /// <summary>
+        /// Get all employees
+        /// </summary>
+        public async Task<ApiResponse<IEnumerable<Employee>>> GetAllEmployeesAsync()
         {
-            return await _context.Employees.ToListAsync();
-        }
+            var response = new ApiResponse<IEnumerable<Employee>>();
 
-        public async Task<Employee?> GetEmployeeByIdAsync(int id)
-        {
-            return await _context.Employees.FindAsync(id);
-        }
-
-        public async Task<Employee> AddEmployeeAsync(Employee employee)
-        {
-            _context.Employees.Add(employee);
-            await _context.SaveChangesAsync();
-            return employee;
-        }
-
-        public async Task<Employee?> UpdateEmployeeAsync(Employee employee)
-        {
-            _context.Employees.Update(employee);
-            await _context.SaveChangesAsync();
-            return employee;
-        }
-
-        public async Task<bool> DeleteEmployeeAsync(int id)
-        {
-            var emp = await _context.Employees.FindAsync(id);
-            if (emp == null) return false;
-
-            _context.Employees.Remove(emp);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<IEnumerable<EmployeeActivity>> GetAllEmployeeActivityAsync()
-        {
-            return await _context.EmployeeActivities.ToListAsync();
-        }
-
-        public async Task<ApiResponse> RegisterAsync(EmployeeRegisterDto request)
-{
-    var response = new ApiResponse();
             try
             {
-                // Validate input
-                if (string.IsNullOrEmpty(request.EmployeeId) || string.IsNullOrEmpty(request.Password))
+                var employees = await _context.Employees
+                    .Where(e => e.IsActive)
+                    .OrderBy(e => e.EmployeeId)
+                    .ToListAsync();
+
+                response.Success = true;
+                response.Message = $"Retrieved {employees.Count} employees";
+                response.Data = employees;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving all employees");
+                response.Success = false;
+                response.Message = "Failed to retrieve employees";
+                response.Errors.Add(ex.Message);
+            }
+
+            return response;
+        }
+
+        /// <summary>
+        /// Get employee by database ID
+        /// </summary>
+        public async Task<ApiResponse<Employee>> GetEmployeeByIdAsync(int id)
+        {
+            var response = new ApiResponse<Employee>();
+
+            try
+            {
+                var employee = await _context.Employees
+                    .Include(e => e.PunchRecords)
+                    .Include(e => e.EmployeeContacts)
+                    .FirstOrDefaultAsync(e => e.Id == id);
+
+                if (employee == null)
                 {
                     response.Success = false;
-                    response.Message = "Employee ID and password are required";
+                    response.Message = "Employee not found";
                     return response;
                 }
 
-                // Check if employee already exists
+                response.Success = true;
+                response.Data = employee;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving employee {EmployeeId}", id);
+                response.Success = false;
+                response.Message = "Failed to retrieve employee";
+                response.Errors.Add(ex.Message);
+            }
+
+            return response;
+        }
+
+        /// <summary>
+        /// Get employee by Employee ID (string)
+        /// </summary>
+        public async Task<ApiResponse<Employee>> GetEmployeeByEmployeeIdAsync(string employeeId)
+        {
+            var response = new ApiResponse<Employee>();
+
+            try
+            {
+                var employee = await _context.Employees
+                    .Include(e => e.PunchRecords)
+                    .Include(e => e.EmployeeContacts)
+                    .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
+
+                if (employee == null)
+                {
+                    response.Success = false;
+                    response.Message = "Employee not found";
+                    return response;
+                }
+
+                response.Success = true;
+                response.Data = employee;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving employee {EmployeeId}", employeeId);
+                response.Success = false;
+                response.Message = "Failed to retrieve employee";
+                response.Errors.Add(ex.Message);
+            }
+
+            return response;
+        }
+
+        /// <summary>
+        /// Add new employee
+        /// </summary>
+        public async Task<ApiResponse<Employee>> AddEmployeeAsync(Employee employee)
+        {
+            var response = new ApiResponse<Employee>();
+
+            try
+            {
+                // Check duplicates
                 var existingEmployee = await _context.Employees
-                    .FirstOrDefaultAsync(e => e.EmployeeId == request.EmployeeId);
+                    .FirstOrDefaultAsync(e => e.EmployeeId == employee.EmployeeId);
 
                 if (existingEmployee != null)
                 {
@@ -81,61 +139,190 @@ namespace PunchApiProject.Services
                     return response;
                 }
 
-                // Check if email already exists
-                if (!string.IsNullOrEmpty(request.Email))
-                {
-                    var existingEmail = await _context.Employees
-                        .FirstOrDefaultAsync(e => e.Email == request.Email);
+                var existingEmail = await _context.Employees
+                    .FirstOrDefaultAsync(e => e.Email == employee.Email);
 
-                    if (existingEmail != null)
-                    {
-                        response.Success = false;
-                        response.Message = "Email already registered";
-                        return response;
-                    }
+                if (existingEmail != null)
+                {
+                    response.Success = false;
+                    response.Message = "Email already registered";
+                    return response;
                 }
 
-                // Create new employee
-                var employee = new Employee
-                {
-                    EmployeeId = request.EmployeeId,
-                    FirstName = request.FirstName,
-                    LastName = request.LastName,
-                    Email = request.Email,
-                    Phone = request.Phone ?? "",
-                    Department = request.Department,
-                    Position = request.Position,
-                    PasswordHash = HashPassword(request.Password),
-                    JoinDate = string.IsNullOrEmpty(request.JoinDate) 
-                        ? DateTime.UtcNow 
-                        : DateTime.Parse(request.JoinDate),
-                    IsActive = true,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
+                employee.CreatedAt = DateTime.UtcNow;
+                employee.UpdatedAt = DateTime.UtcNow;
 
                 _context.Employees.Add(employee);
                 await _context.SaveChangesAsync();
 
                 response.Success = true;
-                response.Data = employee.EmployeeId;
-                response.Message = $"Employee {employee.FirstName} {employee.LastName} registered successfully!";
+                response.Message = $"Employee {employee.FullName} added successfully";
+                response.Data = employee;
+
+                _logger.LogInformation("New employee added: {EmployeeId} ({Name})", employee.EmployeeId, employee.FullName);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error adding employee");
                 response.Success = false;
-                response.Message = $"Registration failed: {ex.Message}";
+                response.Message = "Failed to add employee";
+                response.Errors.Add(ex.Message);
             }
 
             return response;
         }
 
-        // Simple password hashing method
-        private string HashPassword(string password)
+        /// <summary>
+        /// Update employee
+        /// </summary>
+        public async Task<ApiResponse<Employee>> UpdateEmployeeAsync(int id, EmployeeUpdateDto dto)
         {
-            using var sha256 = System.Security.Cryptography.SHA256.Create();
-            var hashedBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-            return Convert.ToBase64String(hashedBytes);
+            var response = new ApiResponse<Employee>();
+
+            try
+            {
+                var employee = await _context.Employees.FindAsync(id);
+
+                if (employee == null)
+                {
+                    response.Success = false;
+                    response.Message = "Employee not found";
+                    return response;
+                }
+
+                if (!string.IsNullOrEmpty(dto.FirstName))
+                    employee.FirstName = dto.FirstName;
+
+                if (!string.IsNullOrEmpty(dto.LastName))
+                    employee.LastName = dto.LastName;
+
+                if (!string.IsNullOrEmpty(dto.Phone))
+                    employee.Phone = dto.Phone;
+
+                if (!string.IsNullOrEmpty(dto.Department))
+                    employee.Department = dto.Department;
+
+                if (!string.IsNullOrEmpty(dto.Position))
+                    employee.Position = dto.Position;
+
+                if (dto.IsActive.HasValue)
+                    employee.IsActive = dto.IsActive.Value;
+
+                employee.UpdatedAt = DateTime.UtcNow;
+
+                _context.Employees.Update(employee);
+                await _context.SaveChangesAsync();
+
+                await _auditService.LogActionAsync(employee.Id, "Update", "Employee information updated");
+
+                response.Success = true;
+                response.Message = "Employee updated successfully";
+                response.Data = employee;
+
+                _logger.LogInformation("Employee updated: {EmployeeId}", employee.EmployeeId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating employee {EmployeeId}", id);
+                response.Success = false;
+                response.Message = "Failed to update employee";
+                response.Errors.Add(ex.Message);
+            }
+
+            return response;
+        }
+
+        /// <summary>
+        /// Delete employee (soft delete)
+        /// </summary>
+        public async Task<ApiResponse> DeleteEmployeeAsync(int id)
+        {
+            var response = new ApiResponse();
+
+            try
+            {
+                var employee = await _context.Employees.FindAsync(id);
+
+                if (employee == null)
+                {
+                    response.Success = false;
+                    response.Message = "Employee not found";
+                    return response;
+                }
+
+                employee.IsActive = false;
+                employee.UpdatedAt = DateTime.UtcNow;
+
+                _context.Employees.Update(employee);
+                await _context.SaveChangesAsync();
+
+                await _auditService.LogActionAsync(employee.Id, "Delete", "Employee account deactivated");
+
+                response.Success = true;
+                response.Message = $"Employee {employee.FullName} deleted successfully";
+
+                _logger.LogInformation("Employee deleted: {EmployeeId}", employee.EmployeeId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting employee {EmployeeId}", id);
+                response.Success = false;
+                response.Message = "Failed to delete employee";
+                response.Errors.Add(ex.Message);
+            }
+
+            return response;
+        }
+
+        /// <summary>
+        /// Change employee password
+        /// </summary>
+        public async Task<ApiResponse> ChangePasswordAsync(int employeeId, string oldPassword, string newPassword)
+        {
+            var response = new ApiResponse();
+
+            try
+            {
+                var employee = await _context.Employees.FindAsync(employeeId);
+
+                if (employee == null)
+                {
+                    response.Success = false;
+                    response.Message = "Employee not found";
+                    return response;
+                }
+
+                // Verify old password
+                if (!BCrypt.Net.BCrypt.Verify(oldPassword, employee.PasswordHash))
+                {
+                    response.Success = false;
+                    response.Message = "Old password is incorrect";
+                    return response;
+                }
+
+                // Hash new password
+                employee.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+                employee.UpdatedAt = DateTime.UtcNow;
+
+                _context.Employees.Update(employee);
+                await _context.SaveChangesAsync();
+
+                await _auditService.LogActionAsync(employeeId, "PasswordChange", "Employee password changed");
+
+                response.Success = true;
+                response.Message = "Password changed successfully";
+
+                _logger.LogInformation("Password changed for employee {EmployeeId}", employeeId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error changing password for employee {EmployeeId}", employeeId);
+                response.Success = false;
+                response.Message = "Failed to change password";
+                response.Errors.Add(ex.Message);
+            }
+
+            return response;
         }
     }
 }

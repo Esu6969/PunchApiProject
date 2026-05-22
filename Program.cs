@@ -3,7 +3,10 @@
 using Microsoft.EntityFrameworkCore;
 using PunchApiProject.Data;
 using PunchApiProject.Services;
-using PunchApiProject.Middleware; // ✅ import middleware namespace
+using PunchApiProject.Services.Interfaces;
+using PunchApiProject.Middleware;
+using Hangfire;
+using Hangfire.SqlServer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,8 +39,20 @@ builder.Services.AddDbContext<PunchDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// ✅ Hangfire Configuration
+builder.Services.AddHangfire(config =>
+    config.SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+          .UseSimpleAssemblyNameTypeSerializer()
+          .UseRecommendedSerializerSettings()
+          .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddHangfireServer();
+
 // ✅ Application Services
 builder.Services.AddScoped<IPunchService, PunchService>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+builder.Services.AddScoped<IAuditService, AuditService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 
 // ✅ Session — 30 minute timeout
 builder.Services.AddDistributedMemoryCache();
@@ -57,7 +72,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "Employee Punch API",
         Version = "v1",
-        Description = "API for Employee Time Tracking System"
+        Description = "API for Employee Time Tracking System with Hangfire Background Jobs"
     });
 });
 
@@ -81,28 +96,30 @@ else
     app.UseHsts();
 }
 
+// ✅ Hangfire Dashboard (optional - only in development)
+if (app.Environment.IsDevelopment())
+{
+    app.UseHangfireDashboard("/hangfire", new DashboardOptions
+    {
+        DashboardTitle = "Punch API Background Jobs",
+        Authorization = new[] { new MyAuthorizationFilter() }
+    });
+}
+
 app.UseDefaultFiles(new DefaultFilesOptions
 {
     DefaultFileNames = new List<string> { "login.html", "index.html" }
 });
 
 app.UseStaticFiles();           // 1️⃣ Serve static files first
-
 app.UseRouting();               // 2️⃣ Routing
-
 app.UseCors("AllowFrontend");   // 3️⃣ CORS
-
-app.UseSession();               // 4️⃣ Session (must be before middleware)
-
-app.UseSessionValidation();     // 5️⃣ ✅ Our custom session middleware
-                                //    automatically checks session on all
-                                //    protected routes — no manual checks needed
-
+app.UseSession();               // 4️⃣ Session
+app.UseSessionValidation();     // 5️⃣ Custom session middleware
 app.UseAuthorization();         // 6️⃣ Authorization
-
 app.MapControllers();           // 7️⃣ Controllers
 
-// Health check — public route (no session needed)
+// ── Health Check ──────────────────────────────────────────────
 app.MapGet("/health", () => Results.Ok(new
 {
     status = "healthy",
@@ -112,11 +129,28 @@ app.MapGet("/health", () => Results.Ok(new
 
 app.MapFallbackToFile("login.html");
 
+// ── Schedule Hangfire Jobs ────────────────────────────────────
+RecurringJob.AddOrUpdate(
+    "send-daily-reminders",
+    () => HangfireBackgroundJobs.SendDailyPunchRemindersAsync(app.Services),
+    Cron.Daily(9, 0)); // 9 AM every day
+
+RecurringJob.AddOrUpdate(
+    "generate-daily-report",
+    () => HangfireBackgroundJobs.GenerateDailyAttendanceReportAsync(app.Services),
+    Cron.Daily(18, 0)); // 6 PM every day
+
+RecurringJob.AddOrUpdate(
+    "cleanup-audit-logs",
+    () => HangfireBackgroundJobs.CleanupOldAuditLogsAsync(app.Services),
+    Cron.Daily(2, 0)); // 2 AM every day
+
 // ── Startup Logs ─────────────────────────────────────────────
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 logger.LogInformation("Application Started");
 logger.LogInformation("Swagger: http://localhost:5031/swagger");
 logger.LogInformation("Login:   http://localhost:5031/login.html");
+logger.LogInformation("Hangfire Dashboard: http://localhost:5031/hangfire");
 
 // ── Database Setup ────────────────────────────────────────────
 using (var scope = app.Services.CreateScope())
@@ -135,3 +169,14 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+
+// ── Hangfire Authorization Filter ────────────────────────────
+public class MyAuthorizationFilter : IDashboardAuthorizationFilter
+{
+    public bool Authorize(DashboardContext context)
+    {
+        // In production, implement proper authentication
+        var httpContext = context.GetHttpContext();
+        return httpContext.User.Identity?.IsAuthenticated ?? false;
+    }
+}

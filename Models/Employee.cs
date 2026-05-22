@@ -13,6 +13,7 @@ namespace PunchApiProject.Models
 
         [Required]
         [StringLength(50)]
+        [Index(IsUnique = true)]
         public string EmployeeId { get; set; } = string.Empty;
 
         [Required]
@@ -26,6 +27,7 @@ namespace PunchApiProject.Models
         [Required]
         [EmailAddress]
         [StringLength(255)]
+        [Index(IsUnique = true)]
         public string Email { get; set; } = string.Empty;
 
         [StringLength(20)]
@@ -52,13 +54,15 @@ namespace PunchApiProject.Models
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
+        public DateTime? LastLoginAt { get; set; }
+
         // Full name property for convenience
         [NotMapped]
         public string FullName => $"{FirstName} {LastName}";
 
-        // Navigation property
+        // Navigation properties
         public virtual ICollection<PunchRecord> PunchRecords { get; set; } = new List<PunchRecord>();
-
-        public virtual List<EmployeeContacts> EmployeeContacts { get; set; } = null!;
+        public virtual ICollection<EmployeeContacts> EmployeeContacts { get; set; } = new List<EmployeeContacts>();
+        public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
     }
 }

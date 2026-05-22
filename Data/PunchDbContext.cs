@@ -5,23 +5,22 @@ namespace PunchApiProject.Data
 {
     public class PunchDbContext : DbContext
     {
-        public PunchDbContext(DbContextOptions<PunchDbContext> options) : base(options) 
-        { 
-        }
+        public PunchDbContext(DbContextOptions<PunchDbContext> options) : base(options) { }
 
         public DbSet<Employee> Employees { get; set; } = null!;
         public DbSet<PunchRecord> PunchRecords { get; set; } = null!;
         public DbSet<EmployeeActivity> EmployeeActivities { get; set; } = null!;
         public DbSet<EmployeeContacts> EmployeeContacts { get; set; } = null!;
+        public DbSet<AuditLog> AuditLogs { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure Employee table with proper column names
+            // Configure Employee
             modelBuilder.Entity<Employee>(entity =>
             {
-                entity.ToTable("employees"); // Lowercase table name for PostgreSQL
+                entity.ToTable("employees");
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).HasColumnName("id").ValueGeneratedOnAdd();
                 entity.Property(e => e.EmployeeId).HasColumnName("employee_id").IsRequired().HasMaxLength(50);
@@ -31,17 +30,18 @@ namespace PunchApiProject.Data
                 entity.Property(e => e.Phone).HasColumnName("phone").HasMaxLength(20);
                 entity.Property(e => e.Department).HasColumnName("department").IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Position).HasColumnName("position").IsRequired().HasMaxLength(100);
-                entity.Property(e => e.PasswordHash).HasColumnName("password_hash").IsRequired().HasMaxLength(255);
+                entity.Property(e => e.PasswordHash).HasColumnName("password_hash").IsRequired();
                 entity.Property(e => e.JoinDate).HasColumnName("join_date").IsRequired();
                 entity.Property(e => e.IsActive).HasColumnName("is_active");
                 entity.Property(e => e.CreatedAt).HasColumnName("created_at");
                 entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
-                
+                entity.Property(e => e.LastLoginAt).HasColumnName("last_login_at");
+
                 entity.HasIndex(e => e.Email).IsUnique();
                 entity.HasIndex(e => e.EmployeeId).IsUnique();
             });
 
-            // Configure PunchRecord table
+            // Configure PunchRecord
             modelBuilder.Entity<PunchRecord>(entity =>
             {
                 entity.ToTable("punch_records");
@@ -57,7 +57,7 @@ namespace PunchApiProject.Data
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Configure EmployeeActivity table
+            // Configure EmployeeActivity
             modelBuilder.Entity<EmployeeActivity>(entity =>
             {
                 entity.ToTable("employee_activities");
@@ -68,16 +68,37 @@ namespace PunchApiProject.Data
                 entity.Property(e => e.PunchOutTime).HasColumnName("punch_out_time");
             });
 
-            // Configure EmployeeContact table
+            // Configure EmployeeContacts
             modelBuilder.Entity<EmployeeContacts>(entity =>
             {
                 entity.ToTable("employee_contacts");
                 entity.HasKey(e => e.EmployeeContactId);
 
                 entity.HasOne(p => p.Employee)
-                     .WithMany(e => e.EmployeeContacts)
-                     .HasForeignKey(p => p.EmployeeId)
-                     .OnDelete(DeleteBehavior.Cascade);
+                      .WithMany(e => e.EmployeeContacts)
+                      .HasForeignKey(p => p.EmployeeId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configure AuditLog
+            modelBuilder.Entity<AuditLog>(entity =>
+            {
+                entity.ToTable("audit_logs");
+                entity.HasKey(a => a.Id);
+                entity.Property(a => a.Id).HasColumnName("id").ValueGeneratedOnAdd();
+                entity.Property(a => a.EmployeeId).HasColumnName("employee_id").IsRequired();
+                entity.Property(a => a.Action).HasColumnName("action").IsRequired().HasMaxLength(100);
+                entity.Property(a => a.ActionType).HasColumnName("action_type").IsRequired().HasMaxLength(50);
+                entity.Property(a => a.Details).HasColumnName("details");
+                entity.Property(a => a.CreatedAt).HasColumnName("created_at").IsRequired();
+                entity.Property(a => a.IpAddress).HasColumnName("ip_address").HasMaxLength(50);
+
+                entity.HasOne(a => a.Employee)
+                      .WithMany(e => e.AuditLogs)
+                      .HasForeignKey(a => a.EmployeeId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(a => a.CreatedAt);
             });
         }
     }
