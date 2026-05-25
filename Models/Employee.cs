@@ -2,10 +2,13 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace PunchApiProject.Models
 {
-    [Table("Employees")]
+    [Table("employees")]
+    [Index(nameof(Email), IsUnique = true)]
+    [Index(nameof(EmployeeId), IsUnique = true)]
     public class Employee
     {
         [Key]
@@ -13,7 +16,6 @@ namespace PunchApiProject.Models
 
         [Required]
         [StringLength(50)]
-        [Index(IsUnique = true)]
         public string EmployeeId { get; set; } = string.Empty;
 
         [Required]
@@ -27,7 +29,6 @@ namespace PunchApiProject.Models
         [Required]
         [EmailAddress]
         [StringLength(255)]
-        [Index(IsUnique = true)]
         public string Email { get; set; } = string.Empty;
 
         [StringLength(20)]
@@ -56,7 +57,6 @@ namespace PunchApiProject.Models
 
         public DateTime? LastLoginAt { get; set; }
 
-        // Full name property for convenience
         [NotMapped]
         public string FullName => $"{FirstName} {LastName}";
 

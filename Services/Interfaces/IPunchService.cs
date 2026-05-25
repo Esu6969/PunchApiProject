@@ -5,12 +5,12 @@ namespace PunchApiProject.Services.Interfaces
 {
     public interface IPunchService
     {
-        Task<ApiResponse<IEnumerable<PunchRecordDto>>> GetAllPunchRecordsAsync();
-        Task<ApiResponse<IEnumerable<PunchRecordDto>>> GetPunchRecordsByEmployeeIdAsync(int employeeId);
-        Task<ApiResponse<PunchRecordDto>> GetPunchRecordByIdAsync(int id);
-        Task<ApiResponse<object>> PunchInAsync(int employeeId);
-        Task<ApiResponse<object>> PunchOutAsync(int employeeId);
-        Task<ApiResponse<EmployeeStatsDto>> GetEmployeeStatsAsync(int employeeId);
-        Task<ApiResponse<IEnumerable<PunchRecordDto>>> GetRecordsByDateRangeAsync(int employeeId, DateTime startDate, DateTime endDate);
+        Task<IEnumerable<PunchRecord>> GetAllPunchRecordsAsync();
+        Task<IEnumerable<PunchRecord>> GetPunchRecordsByEmployeeIdAsync(int employeeId);
+        Task<PunchRecord?> GetPunchRecordByIdAsync(int id);
+        Task<ApiResponse> PunchInAsync(int employeeId);
+        Task<ApiResponse> PunchOutAsync(int employeeId);
+        Task<object> GetEmployeeStatsAsync(int employeeId);
+        Task<IEnumerable<PunchRecord>> GetRecordsByDateRangeAsync(int employeeId, DateTime startDate, DateTime endDate);
     }
 }

@@ -1,11 +1,11 @@
-﻿// Controllers/EmployeeController.cs
-// ✅ No manual session checks needed anywhere in this file
-//    SessionMiddleware handles it automatically for all routes
-
+﻿
 using Microsoft.AspNetCore.Mvc;
 using PunchApiProject.DTOs;
 using PunchApiProject.Models;
 using PunchApiProject.Services.Interfaces;
+using PunchApiProject.Data;
+using PunchApiProject.Middleware;  
+
 
 namespace PunchApiProject.Controllers
 {
@@ -43,7 +43,12 @@ namespace PunchApiProject.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to get employees");
-                return StatusCode(500, new { message = "Failed to retrieve employees", error = ex.Message });
+                return StatusCode(500, new ApiResponse 
+                { 
+                    Success = false, 
+                    Message = "Failed to retrieve employees", 
+                    Errors = new List<string> { ex.Message } 
+                });
             }
         }
 
@@ -224,6 +229,13 @@ namespace PunchApiProject.Controllers
             {
                 if (employeeId <= 0)
                     return BadRequest(new { success = false, message = "Valid Employee ID is required" });
+
+                if (startDate >= endDate)
+                    return BadRequest(new ApiResponse 
+                    { 
+                        Success = false, 
+                        Message = "Start date must be before end date" 
+                    });
 
                 return Ok(await _reportService.GetEmployeeAttendanceAsync(employeeId, startDate, endDate));
             }

@@ -1,25 +1,97 @@
 ﻿// Middleware/SessionMiddleware.cs
+using Microsoft.AspNetCore.Http;
 
 namespace PunchApiProject.Middleware
 {
-    public class SessionMiddleware
+    /// <summary>
+    /// Extension methods for session management
+    /// </summary>
+    public static class SessionExtensions
+    {
+        private const string SESSION_EMPLOYEE_ID = "EmployeeId";
+        private const string SESSION_EMPLOYEE_NAME = "EmployeeName";
+        private const string SESSION_DEPARTMENT = "Department";
+        private const string SESSION_POSITION = "Position";
+        private const string SESSION_ID = "Id";
+
+        /// <summary>
+        /// Set login session for employee
+        /// </summary>
+        public static void SetLoginSession(this HttpContext httpContext, string employeeId, string employeeName, string department, string position, int id)
+        {
+            httpContext.Session.SetString(SESSION_EMPLOYEE_ID, employeeId);
+            httpContext.Session.SetString(SESSION_EMPLOYEE_NAME, employeeName);
+            httpContext.Session.SetString(SESSION_DEPARTMENT, department);
+            httpContext.Session.SetString(SESSION_POSITION, position);
+            httpContext.Session.SetInt32(SESSION_ID, id);
+        }
+
+        /// <summary>
+        /// Clear login session
+        /// </summary>
+        public static void ClearLoginSession(this HttpContext httpContext)
+        {
+            httpContext.Session.Clear();
+        }
+
+        /// <summary>
+        /// Get Employee ID from session
+        /// </summary>
+        public static string? GetSessionEmployeeId(this HttpContext httpContext)
+        {
+            return httpContext.Session.GetString(SESSION_EMPLOYEE_ID);
+        }
+
+        /// <summary>
+        /// Get Employee Name from session
+        /// </summary>
+        public static string? GetSessionEmployeeName(this HttpContext httpContext)
+        {
+            return httpContext.Session.GetString(SESSION_EMPLOYEE_NAME);
+        }
+
+        /// <summary>
+        /// Get Department from session
+        /// </summary>
+        public static string? GetSessionDepartment(this HttpContext httpContext)
+        {
+            return httpContext.Session.GetString(SESSION_DEPARTMENT);
+        }
+
+        /// <summary>
+        /// Get Position from session
+        /// </summary>
+        public static string? GetSessionPosition(this HttpContext httpContext)
+        {
+            return httpContext.Session.GetString(SESSION_POSITION);
+        }
+
+        /// <summary>
+        /// Get Employee ID (int) from session
+        /// </summary>
+        public static int? GetSessionId(this HttpContext httpContext)
+        {
+            return httpContext.Session.GetInt32(SESSION_ID);
+        }
+
+        /// <summary>
+        /// Check if user is logged in
+        /// </summary>
+        public static bool IsLoggedIn(this HttpContext httpContext)
+        {
+            return !string.IsNullOrEmpty(httpContext.GetSessionEmployeeId());
+        }
+    }
+
+    /// <summary>
+    /// Middleware to validate session on protected routes
+    /// </summary>
+    public class SessionValidationMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger<SessionMiddleware> _logger;
+        private readonly ILogger<SessionValidationMiddleware> _logger;
 
-        // ✅ These routes are PUBLIC — no session needed
-        private static readonly string[] PublicRoutes = new[]
-        {
-            "/api/auth/login",
-            "/api/auth/register",
-            "/health",
-            "/swagger",
-            "/login.html",
-            "/index.html",
-            "/favicon.ico"
-        };
-
-        public SessionMiddleware(RequestDelegate next, ILogger<SessionMiddleware> logger)
+        public SessionValidationMiddleware(RequestDelegate next, ILogger<SessionValidationMiddleware> logger)
         {
             _next = next;
             _logger = logger;
@@ -27,63 +99,34 @@ namespace PunchApiProject.Middleware
 
         public async Task InvokeAsync(HttpContext context)
         {
+            // List of public routes that don't require authentication
+            var publicRoutes = new[] { "/api/auth/login", "/api/auth/register", "/health" };
+
             var path = context.Request.Path.Value?.ToLower() ?? "";
 
-            // ✅ Step 1 — Check if route is public (no session needed)
-            bool isPublicRoute = PublicRoutes.Any(route =>
-                path.StartsWith(route.ToLower()));
+            // Check if route is public
+            bool isPublicRoute = publicRoutes.Any(route => path.StartsWith(route));
 
-            if (isPublicRoute)
+            if (!isPublicRoute && !context.IsLoggedIn())
             {
-                // Public route — skip session check, go to next middleware
-                await _next(context);
-                return;
-            }
-
-            // ✅ Step 2 — Check if session exists for protected routes
-            var employeeId = context.Session.GetString("EmployeeId");
-
-            if (string.IsNullOrEmpty(employeeId))
-            {
-                _logger.LogWarning("Unauthorized access attempt to: {Path}", path);
-
-                // Session not found — return 401
+                _logger.LogWarning("Unauthorized access attempt to {Path}", path);
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                context.Response.ContentType = "application/json";
-
-                await context.Response.WriteAsync(
-                    System.Text.Json.JsonSerializer.Serialize(new
-                    {
-                        success = false,
-                        message = "Session expired or not logged in. Please login again.",
-                        redirectTo = "/login.html"
-                    })
-                );
+                await context.Response.WriteAsJsonAsync(new { success = false, message = "Not authenticated" });
                 return;
             }
 
-            // ✅ Step 3 — Session is valid, attach user info to HttpContext
-            // This makes user info available in all controllers
-            context.Items["EmployeeId"] = employeeId;
-            context.Items["EmployeeName"] = context.Session.GetString("EmployeeName");
-            context.Items["Department"] = context.Session.GetString("Department");
-            context.Items["Position"] = context.Session.GetString("Position");
-            context.Items["Id"] = context.Session.GetInt32("Id");
-
-            _logger.LogInformation("Session valid for: {EmployeeId} accessing {Path}",
-                employeeId, path);
-
-            // ✅ Step 4 — Continue to next middleware / controller
             await _next(context);
         }
     }
 
-    // ✅ Extension method — makes it easy to register in Program.cs
+    /// <summary>
+    /// Extension to add session validation middleware
+    /// </summary>
     public static class SessionMiddlewareExtensions
     {
-        public static IApplicationBuilder UseSessionValidation(this IApplicationBuilder app)
+        public static IApplicationBuilder UseSessionValidation(this IApplicationBuilder builder)
         {
-            return app.UseMiddleware<SessionMiddleware>();
+            return builder.UseMiddleware<SessionValidationMiddleware>();
         }
     }
 }

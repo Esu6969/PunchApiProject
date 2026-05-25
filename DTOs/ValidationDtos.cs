@@ -14,6 +14,9 @@ namespace PunchApiProject.DTOs
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     }
 
+    /// <summary>
+    /// Non-generic API response
+    /// </summary>
     public class ApiResponse
     {
         public bool Success { get; set; }
@@ -24,13 +27,13 @@ namespace PunchApiProject.DTOs
     }
 
     /// <summary>
-    /// Employee registration DTO with comprehensive validation
+    /// Employee registration DTO
     /// </summary>
     public class EmployeeRegistrationDto
     {
         [Required(ErrorMessage = "Employee ID is required")]
         [StringLength(50, MinimumLength = 3, ErrorMessage = "Employee ID must be between 3 and 50 characters")]
-        [RegularExpression(@"^[A-Za-z0-9-_]+$", ErrorMessage = "Employee ID can only contain letters, numbers, dashes, and underscores")]
+        [RegularExpression(@"^[A-Za-z0-9-_]+$", ErrorMessage = "Employee ID can only contain alphanumeric characters, dashes, and underscores")]
         public string EmployeeId { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "First Name is required")]
@@ -67,7 +70,6 @@ namespace PunchApiProject.DTOs
         [DataType(DataType.Date)]
         public string? JoinDate { get; set; }
 
-        [Phone(ErrorMessage = "Each phone number must be in valid format")]
         public List<string> Phones { get; set; } = new();
     }
 
@@ -157,5 +159,23 @@ namespace PunchApiProject.DTOs
         public int TodayPunches { get; set; }
         public DateTime? LastPunchTime { get; set; }
         public string LastPunchType { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// Employee registration request DTO
+    /// </summary>
+    public class EmployeeRegisterDtos
+    {
+        [Required]
+        [StringLength(50)]
+        public string EmployeeId { get; set; } = string.Empty;
+
+        [Required]
+        [StringLength(255)]
+        public string Password { get; set; } = string.Empty;
+
+        [EmailAddress]
+        [StringLength(255)]
+        public string? Email { get; set; }
     }
 }

@@ -4,7 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PunchApiProject.Data;
 using PunchApiProject.Models;
-using PunchApiProject.Middleware; // ✅ import session extensions
+using PunchApiProject.DTOs;
+using PunchApiProject.Middleware;
 
 namespace PunchApiProject.Controllers
 {
@@ -21,9 +22,13 @@ namespace PunchApiProject.Controllers
             _logger = logger;
         }
 
-        // ── POST: api/auth/register ──────────────────────────────
+        /// <summary>
+        /// Register a new employee
+        /// </summary>
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] EmployeeRegistrationDto dto)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+            public async Task<IActionResult> Register([FromBody] EmployeeRegistrationDto dto)
         {
             try
             {

@@ -113,7 +113,11 @@ namespace PunchApiProject.Services
                     success = true,
                     employeeId = employee.EmployeeId,
                     employeeName = employee.FullName,
-                    period = new { startDate = startDate.ToString("yyyy-MM-dd"), endDate = endDate.ToString("yyyy-MM-dd") },
+                    period = new
+                    {
+                        startDate = startDate.ToString("yyyy-MM-dd"),
+                        endDate = endDate.ToString("yyyy-MM-dd")
+                    },
                     statistics = new
                     {
                         totalHours = Math.Round(totalHours, 2),

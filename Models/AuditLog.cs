@@ -1,10 +1,12 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace PunchApiProject.Models
 {
-    [Table("AuditLogs")]
+    [Table("audit_logs")]
+    [Index(nameof(CreatedAt))]
     public class AuditLog
     {
         [Key]
@@ -22,7 +24,7 @@ namespace PunchApiProject.Models
 
         [Required]
         [StringLength(50)]
-        public string ActionType { get; set; } = string.Empty; // Login, PunchIn, PunchOut, etc.
+        public string ActionType { get; set; } = string.Empty;
 
         public string Details { get; set; } = string.Empty;
 

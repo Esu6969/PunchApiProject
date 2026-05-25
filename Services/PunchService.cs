@@ -1,4 +1,4 @@
-    using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PunchApiProject.Data;
 using PunchApiProject.DTOs;
 using PunchApiProject.Models;
@@ -19,136 +19,33 @@ namespace PunchApiProject.Services
             _auditService = auditService;
         }
 
-        /// <summary>
-        /// Get all punch records for all employees
-        /// </summary>
-        public async Task<ApiResponse<IEnumerable<PunchRecordDto>>> GetAllPunchRecordsAsync()
+        public async Task<IEnumerable<PunchRecord>> GetAllPunchRecordsAsync()
         {
-            var response = new ApiResponse<IEnumerable<PunchRecordDto>>();
-
-            try
-            {
-                var records = await _context.PunchRecords
-                    .Include(p => p.Employee)
-                    .OrderByDescending(p => p.ActionDateTime)
-                    .Select(p => new PunchRecordDto
-                    {
-                        Id = p.Id,
-                        EmployeeId = p.EmployeeId,
-                        EmployeeName = $"{p.Employee!.FirstName} {p.Employee.LastName}",
-                        ActionDateTime = p.ActionDateTime,
-                        ActionType = p.ActionType
-                    })
-                    .ToListAsync();
-
-                response.Success = true;
-                response.Message = $"Retrieved {records.Count} punch records";
-                response.Data = records;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving all punch records");
-                response.Success = false;
-                response.Message = "Failed to retrieve punch records";
-                response.Errors.Add(ex.Message);
-            }
-
-            return response;
+            return await _context.PunchRecords
+                .Include(p => p.Employee)
+                .OrderByDescending(p => p.ActionDateTime)
+                .ToListAsync();
         }
 
-        /// <summary>
-        /// Get punch records for a specific employee
-        /// </summary>
-        public async Task<ApiResponse<IEnumerable<PunchRecordDto>>> GetPunchRecordsByEmployeeIdAsync(int employeeId)
+        public async Task<IEnumerable<PunchRecord>> GetPunchRecordsByEmployeeIdAsync(int employeeId)
         {
-            var response = new ApiResponse<IEnumerable<PunchRecordDto>>();
-
-            try
-            {
-                var employee = await _context.Employees.FindAsync(employeeId);
-                if (employee == null)
-                {
-                    response.Success = false;
-                    response.Message = "Employee not found";
-                    return response;
-                }
-
-                var records = await _context.PunchRecords
-                    .Where(p => p.EmployeeId == employeeId)
-                    .Include(p => p.Employee)
-                    .OrderByDescending(p => p.ActionDateTime)
-                    .Select(p => new PunchRecordDto
-                    {
-                        Id = p.Id,
-                        EmployeeId = p.EmployeeId,
-                        EmployeeName = $"{p.Employee!.FirstName} {p.Employee.LastName}",
-                        ActionDateTime = p.ActionDateTime,
-                        ActionType = p.ActionType
-                    })
-                    .ToListAsync();
-
-                response.Success = true;
-                response.Message = $"Retrieved {records.Count} records for {employee.FullName}";
-                response.Data = records;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving punch records for employee {EmployeeId}", employeeId);
-                response.Success = false;
-                response.Message = "Failed to retrieve punch records";
-                response.Errors.Add(ex.Message);
-            }
-
-            return response;
+            return await _context.PunchRecords
+                .Where(p => p.EmployeeId == employeeId)
+                .Include(p => p.Employee)
+                .OrderByDescending(p => p.ActionDateTime)
+                .ToListAsync();
         }
 
-        /// <summary>
-        /// Get punch record by ID
-        /// </summary>
-        public async Task<ApiResponse<PunchRecordDto>> GetPunchRecordByIdAsync(int id)
+        public async Task<PunchRecord?> GetPunchRecordByIdAsync(int id)
         {
-            var response = new ApiResponse<PunchRecordDto>();
-
-            try
-            {
-                var record = await _context.PunchRecords
-                    .Include(p => p.Employee)
-                    .FirstOrDefaultAsync(p => p.Id == id);
-
-                if (record == null)
-                {
-                    response.Success = false;
-                    response.Message = "Punch record not found";
-                    return response;
-                }
-
-                response.Success = true;
-                response.Data = new PunchRecordDto
-                {
-                    Id = record.Id,
-                    EmployeeId = record.EmployeeId,
-                    EmployeeName = $"{record.Employee!.FirstName} {record.Employee.LastName}",
-                    ActionDateTime = record.ActionDateTime,
-                    ActionType = record.ActionType
-                };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving punch record {RecordId}", id);
-                response.Success = false;
-                response.Message = "Failed to retrieve punch record";
-                response.Errors.Add(ex.Message);
-            }
-
-            return response;
+            return await _context.PunchRecords
+                .Include(p => p.Employee)
+                .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        /// <summary>
-        /// Punch in for an employee
-        /// </summary>
-        public async Task<ApiResponse<object>> PunchInAsync(int employeeId)
+        public async Task<ApiResponse> PunchInAsync(int employeeId)
         {
-            var response = new ApiResponse<object>();
+            var response = new ApiResponse();
 
             try
             {
@@ -162,7 +59,6 @@ namespace PunchApiProject.Services
                     return response;
                 }
 
-                // Check if already punched in
                 var lastAction = await _context.PunchRecords
                     .Where(p => p.EmployeeId == employeeId)
                     .OrderByDescending(p => p.ActionDateTime)
@@ -185,12 +81,10 @@ namespace PunchApiProject.Services
                 _context.PunchRecords.Add(punchRecord);
                 await _context.SaveChangesAsync();
 
-                // Update last login
                 employee.LastLoginAt = DateTime.UtcNow;
                 _context.Employees.Update(employee);
                 await _context.SaveChangesAsync();
 
-                // Log audit
                 await _auditService.LogActionAsync(employeeId, "PunchIn", "Employee punched in");
 
                 response.Success = true;
@@ -217,12 +111,9 @@ namespace PunchApiProject.Services
             return response;
         }
 
-        /// <summary>
-        /// Punch out for an employee
-        /// </summary>
-        public async Task<ApiResponse<object>> PunchOutAsync(int employeeId)
+        public async Task<ApiResponse> PunchOutAsync(int employeeId)
         {
-            var response = new ApiResponse<object>();
+            var response = new ApiResponse();
 
             try
             {
@@ -258,7 +149,6 @@ namespace PunchApiProject.Services
                 _context.PunchRecords.Add(punchOutRecord);
                 await _context.SaveChangesAsync();
 
-                // Log audit
                 await _auditService.LogActionAsync(employeeId, "PunchOut", "Employee punched out");
 
                 var timeSpan = punchOutRecord.ActionDateTime - lastAction.ActionDateTime;
@@ -290,23 +180,10 @@ namespace PunchApiProject.Services
             return response;
         }
 
-        /// <summary>
-        /// Get employee statistics
-        /// </summary>
-        public async Task<ApiResponse<EmployeeStatsDto>> GetEmployeeStatsAsync(int employeeId)
+        public async Task<object> GetEmployeeStatsAsync(int employeeId)
         {
-            var response = new ApiResponse<EmployeeStatsDto>();
-
             try
             {
-                var employee = await _context.Employees.FindAsync(employeeId);
-                if (employee == null)
-                {
-                    response.Success = false;
-                    response.Message = "Employee not found";
-                    return response;
-                }
-
                 var today = DateTime.Today;
                 var weekStart = today.AddDays(-(int)today.DayOfWeek);
                 var monthStart = new DateTime(today.Year, today.Month, 1);
@@ -331,78 +208,36 @@ namespace PunchApiProject.Services
                     .OrderByDescending(p => p.ActionDateTime)
                     .FirstOrDefaultAsync();
 
-                var stats = new EmployeeStatsDto
+                return new
                 {
-                    EmployeeId = employee.Id,
-                    EmployeeName = employee.FullName,
-                    TodayHours = CalculateHours(todayRecords),
-                    WeekHours = CalculateHours(weekRecords),
-                    MonthHours = CalculateHours(monthRecords),
-                    TodayPunches = todayRecords.Count,
-                    LastPunchTime = lastRecord?.ActionDateTime,
-                    LastPunchType = lastRecord?.ActionType ?? "None"
+                    employeeId,
+                    todayHours = CalculateHours(todayRecords),
+                    weekHours = CalculateHours(weekRecords),
+                    monthHours = CalculateHours(monthRecords),
+                    todayPunches = todayRecords.Count,
+                    lastPunchTime = lastRecord?.ActionDateTime,
+                    lastPunchType = lastRecord?.ActionType ?? "None"
                 };
-
-                response.Success = true;
-                response.Message = "Statistics retrieved successfully";
-                response.Data = stats;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error calculating stats for employee {EmployeeId}", employeeId);
-                response.Success = false;
-                response.Message = "Failed to retrieve statistics";
-                response.Errors.Add(ex.Message);
+                return new { error = ex.Message };
             }
-
-            return response;
         }
 
-        /// <summary>
-        /// Get records by date range
-        /// </summary>
-        public async Task<ApiResponse<IEnumerable<PunchRecordDto>>> GetRecordsByDateRangeAsync(int employeeId, DateTime startDate, DateTime endDate)
+        public async Task<IEnumerable<PunchRecord>> GetRecordsByDateRangeAsync(int employeeId, DateTime startDate, DateTime endDate)
         {
-            var response = new ApiResponse<IEnumerable<PunchRecordDto>>();
+            if (endDate < startDate)
+                return Enumerable.Empty<PunchRecord>();
 
-            try
-            {
-                if (endDate < startDate)
-                {
-                    response.Success = false;
-                    response.Message = "End date cannot be before start date";
-                    return response;
-                }
-
-                var records = await _context.PunchRecords
-                    .Where(p => p.EmployeeId == employeeId && 
-                                p.ActionDateTime >= startDate && 
-                                p.ActionDateTime <= endDate.AddDays(1))
-                    .Include(p => p.Employee)
-                    .OrderByDescending(p => p.ActionDateTime)
-                    .Select(p => new PunchRecordDto
-                    {
-                        Id = p.Id,
-                        EmployeeId = p.EmployeeId,
-                        EmployeeName = $"{p.Employee!.FirstName} {p.Employee.LastName}",
-                        ActionDateTime = p.ActionDateTime,
-                        ActionType = p.ActionType
-                    })
-                    .ToListAsync();
-
-                response.Success = true;
-                response.Message = $"Retrieved {records.Count} records between {startDate:yyyy-MM-dd} and {endDate:yyyy-MM-dd}";
-                response.Data = records;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving records for date range");
-                response.Success = false;
-                response.Message = "Failed to retrieve records";
-                response.Errors.Add(ex.Message);
-            }
-
-            return response;
+            return await _context.PunchRecords
+                .Where(p => p.EmployeeId == employeeId && 
+                            p.ActionDateTime >= startDate && 
+                            p.ActionDateTime <= endDate.AddDays(1))
+                .Include(p => p.Employee)
+                .OrderByDescending(p => p.ActionDateTime)
+                .ToListAsync();
         }
 
         private decimal CalculateHours(List<PunchRecord> records)
